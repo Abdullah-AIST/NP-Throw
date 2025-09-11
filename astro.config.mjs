@@ -9,6 +9,7 @@ import svelte from "@astrojs/svelte";
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://npthrow.github.io',
   integrations: [tailwind(), icon(), mdx(), react(), svelte()],
   markdown: {
     shikiConfig: {
