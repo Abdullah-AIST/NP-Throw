@@ -24,7 +24,7 @@ Submitted to IEEE International Conference of Robotics and Automation (ICRA 2026
 2. Activate isaaclab conda env and source the np_throw task -- The task was developed using IsaacLab template (https://isaac-sim.github.io/IsaacLab/v2.1.0/source/overview/developer-guide/template.html)
     ```
     conda activate env_isaaclab
-    python -m pip install -e source/np_throw/
+    python -m pip install -e source/Throw/
     ```
 
 3. Install other dependencies -- for UR5e control, we use [UR-RTDE](https://sdurobotics.gitlab.io/ur_rtde/) package 
