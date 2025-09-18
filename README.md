@@ -1,76 +1,93 @@
-# Research project page template
 
-This is a template you can use to build a project page for your research paper, adapted from the original [Nerfies page](https://nerfies.github.io/). It's designed to be easy to set up for those without web development experience, but web developers will appreciate that it's flexible and built with modern, familiar technologies. See a live demo of the template [here](https://research-template.roman.technology).
 
-<img src="public/screenshot-light.png" width="48%" /> <img src = "public/screenshot-dark.png" width="48%" />
+# Non-Prehensile Throwing: A Reinforcement Learning Perspective
 
-## Features
+<!-- [xx](xx)<sup>1</sup>
+<sup>1</sup> xx, <sup>2</sup> xxx -->
 
-- Easily edit the content in Markdown instead of HTML.
-- Quick-to-load, works with mobile devices, accessible, SEO-friendly, and supports dark mode.
-- Includes out-of-the-box components for figures, image comparison sliders, LaTeX, two-column layouts, code blocks (with syntax highlighting), small caps, videos, and YouTube embeds.
-- Add custom components using HTML or even other web frameworks like React, Vue, or Svelte.
-- Built with [Astro](https://astro.build/), [Tailwind CSS](https://tailwindcss.com/), [MDX](https://mdxjs.com/), and [Typescript](https://www.typescriptlang.org/).
 
-## Real-world examples
+Submitted to IEEE International Conference of Robotics and Automation (ICRA 2026).
 
-- [Token-Efficient Long Video Understanding for Multimodal LLMs](https://research.nvidia.com/labs/lpr/storm/) (NVIDIA Research)
-- [Lossy Compression With Pretrained Diffusion Models](https://jeremyiv.github.io/diffc-project-page/) (ICLR 2025)
-- [CLIP-RT: Learning Language-Conditioned Robotic Policies from Natural Language Supervision](https://clip-rt.github.io/)
-- [StochSync: Stochastic Diffusion Synchronization for Image Generation in Arbitrary Spaces](https://stochsync.github.io/)
-- [CRESSim: Simulator for Advancing Surgical Autonomy](https://tbs-ualberta.github.io/CRESSim/)
-- [PCO: Precision-Controllable Offset Surfaces with Sharp Features](https://alan-leo-wong.github.io/SIGASIA24-PCO-ProjectPage/)
+[Paper](npthrow_icra2026.pdf) | [Arxiv](https://abdullah-aist.github.io/NP-Throw/) | [Video](https://www.youtube.com/watch?v=JWAr3b1pHvgv) | [Website](https://abdullah-aist.github.io/NP-Throw/)
 
-## Usage
+[![IsaacSim](https://img.shields.io/badge/IsaacSim-4.5.0-silver.svg)](https://docs.isaacsim.omniverse.nvidia.com/latest/index.html)
+[![Python](https://img.shields.io/badge/python-3.10-blue.svg)](https://docs.python.org/3/whatsnew/3.10.html)
+[![Linux platform](https://img.shields.io/badge/platform-linux--64-orange.svg)](https://releases.ubuntu.com/22.04/)
 
-Want help setting it up? Please schedule a call with me [here](https://cal.com/romanhauksson/meeting), and I'll personally walk you through making your project page live! I want to talk to potential users to figure out pain points and features to add.
 
-1. [Install Node.js](https://nodejs.org/en/download/package-manager).
-1. Click "Use this template" to make a copy of this repository and then clone it, or just clone it directly.
-1. Run `npm install` from the root of the project to install dependencies.
-1. Edit the content in `/src/pages/index.mdx`, and remember to update the favicon and social link thumbnail (optional). In the frontmatter in `index.mdx`, they are set to `favicon.svg` and `screenshot-light.png` respectively, which refer to files in `/public/`.
-1. Run `npm run dev` to see a live preview of your page while you edit it.
-1. Host the website using [GitHub Pages](https://pages.github.com/), [Vercel](https://vercel.com), [Netlify](https://www.netlify.com/), or any other static site hosting service.
+## Installation
 
-[![Deploy to Netlify](https://www.netlify.com/img/deploy/button.svg)](https://app.netlify.com/start/deploy?repository=https://github.com/romanhauksson/academic-project-astro-template) [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FRomanHauksson%2Facademic-project-astro-template)
+1. Follow IsaacLab installation guide https://isaac-sim.github.io/IsaacLab/main/source/setup/installation/pip_installation.html . 
 
-### Icons
+    Our setup is based Ubuntu 22.4, IsaacSim 4.5, and IsaacLab 2.1.0. We use RL_games for training.
 
-This template uses the [Astro Icon](https://www.astroicon.dev/) library.
+2. Activate isaaclab conda env and source the np_throw task -- The task was developed using IsaacLab template (https://isaac-sim.github.io/IsaacLab/v2.1.0/source/overview/developer-guide/template.html)
+    ```
+    conda activate env_isaaclab
+    python -m pip install -e source/np_throw/
+    ```
 
-To use a custom icon:
+3. Install other dependencies -- for UR5e control, we use [UR-RTDE](https://sdurobotics.gitlab.io/ur_rtde/) package 
+    ```bash
+    pip install --user ur_rtde
+    ```
 
-1. Search on [Iconify](https://icon-sets.iconify.design/) to find the icon you want. For example, the Hugging Face icon is `simple-icons:huggingface`, from the Simple Icons icon set.
-1. Install the corresponding icon set: `npm install @iconify-json/simple-icons`.
-1. If you're using the icon in one of the link buttons, add it in one of the objects in the `links` prop of the `<Header />` component in `index.mdx`:
+## Train & Play & Eval
 
-```mdx
-    {
-      name: "Hugging Face",
-      url: "https://huggingface.co/",
-      icon: "simple-icons:huggingface"
-    }
+### Train
+* Pretrained weights are included for the four policies.
+```bash
+# in the root directory of NP-Throw 
+python scripts/train.py --task=NPThrow --num_envs 4096 --headless --experiment_name Default --seed 0  
 ```
 
-Or, to use it anywhere in an Astro component or MDX file:
+### Play
+```bash
+# in the root directory of NP-Throw  -- Make sure to set training flag to False
+python scripts/play.py --task=NPThrow --num_envs 32 --experiment_name Default --seed 0
 
-```mdx
-import { Icon } from "astro-icon/components";
+# Use playZero during enviroment setup for debugging.
+# python scripts/zeroAgent.py --task=NPThrow --num_envs 16
 
-<Icon name={"simple-icons:huggingface"} />
 ```
 
-### Notes
+### Eval
+```bash
+# in the root directory of NP-Throw  -- Make sure to set training flag to False
+# For the environment configuration file, select a target object and the evaluation target.
+python scripts/Eval.py --task=NPThrow --num_envs 32 --headless --experiment_name Default --seed 0 --envSeed 0 --targetObject woodBlock
 
-- If you're using VS Code, I recommend installing the [Astro extension](https://marketplace.visualstudio.com/items?itemName=astro-build.astro-vscode) to get IntelliSense, syntax highlighting, and other features.
-- When people share the link to your project on social media, it will often appear as a "link preview" based on the title, description, thumbnail, and favicon you configured. Double check that these previews look right using [this tool](https://linkpreview.xyz/).
-- The Nerfies page uses the Google Sans font, which is licensed by Google, so unfortunately, I had to change it to a different font instead (I picked Noto Sans).
+```
+### Deploy
+1. Process the trajectories using the "processTrajs_real.ipynb" notebook to analyze and generate neccessary trajectories.
+2. Deploy based of UR-RTDE package 
 
-## Alternative templates
+```bash
+python scripts/deploy.py
+```
 
-- [Clarity: A Minimalist Website Template for AI Research](https://shikun.io/projects/clarity) by Shikun Liu. Beautiful and careful design that's distinct from the original Nerfies page. Editable via an HTML template and SCSS.
-- [Academic Project Page Template](https://denkiwakame.github.io/academic-project-template/) by Mai Nishimura. Built with React and UIKit and editable with Markdown in a YAML file.
 
-## Credits
+## Citation
+If you use this code in your research, please cite our paper:
+```bibtex
+@inproceedings{NP_Throw_ICRA2026,
+  title = "Non-Prehensile Throwing: A Reinforcement Learning Perspective",
+  author = "{Author One, Author Two}",
+  booktitle={ICRA 2026},
+  year={2026},
+  organization={IEEE}
+}
+```
 
-This template was adapted from Eliahu Horwitz's [Academic Project Page Template](https://github.com/eliahuhorwitz/Academic-project-page-template), which was adapted from Keunhong Park's [project page for _Nerfies_](https://nerfies.github.io/). It's licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](http://creativecommons.org/licenses/by-sa/4.0/).
+## License
+
+This codebase is under [CC BY-NC 4.0 license](https://creativecommons.org/licenses/by-nc/4.0/deed.en). You may not use the material for commercial purposes, e.g., to make demos to advertise your commercial products.
+
+
+## Acknowledgements
+- [IsaacLab](https://github.com/isaac-sim/IsaacLab): We use the `isaaclab` library for the RL training and evaluation.
+- [UR-RTDE](https://sdurobotics.gitlab.io/ur_rtde/): We use the `UR-RTDE` package for UR5e real-time control.
+
+## Contact
+
+Feel free to open an issue or discussion if you encounter any problems or have questions about this project.

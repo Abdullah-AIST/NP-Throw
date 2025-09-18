@@ -1,7 +1,7 @@
 ---
 layout: ../layouts/Layout.astro
-title: Research Project Page Template
-description: Simple project page template for your research paper, built with Astro and Tailwind CSS
+title: "Non-Prehensile Throwing: A Reinforcement Learning Perspective"
+description: A project page for NP-Throw
 favicon: favicon.svg
 thumbnail: screenshot-light.png
 ---
@@ -13,16 +13,31 @@ import SmallCaps from "../components/SmallCaps.astro";
 import Figure from "../components/Figure.astro";
 import Image from "../components/Image.astro";
 import TwoColumns from "../components/TwoColumns.astro";
+import ThreeColumns from "../components/ThreeColumns.astro";
 import YouTubeVideo from "../components/YouTubeVideo.astro";
 import LaTeX from "../components/LaTeX.astro";
 
 import { ImageComparison } from "../components/ImageComparison.tsx";
 
 import outside from "../assets/outside.mp4";
-import transformer from "../assets/transformer.webp";
+
+
 import Splat from "../components/Splat.tsx"
-import dogsDiffc from "../assets/dogs-diffc.png"
-import dogsTrue from "../assets/dogs-true.png"
+
+import arch from "../assets/throwArch.png";
+import ablation from "../assets/ablation.png";
+import general from "../assets/general.png";
+import robust from "../assets/robust.png";
+import perform from "../assets/perform.png";
+
+import ranges from "../assets/ranges.png";
+import reward from "../assets/reward.png";
+import observation from "../assets/observation.png";
+
+import real1 from "../assets/Real1.png";
+import real2 from "../assets/Real2.png";
+
+
 
 
 import CodeBlock from "../components/CodeBlock.astro";
@@ -33,139 +48,477 @@ export const components = {pre: CodeBlock, table: Table}
   title={frontmatter.title}
   authors={[
     {
-      name: "Roman Hauksson",
-      url: "https://roman.technology",
-      institution: "Independent",
-      notes: ["*", "†"],
+      name: "Author One",
+      notes: ["*"],
     },
     {
       name: "Author Two",
-      institution: "Institution Two",
-      notes: ["*", "†"],
-    },
-    {
-      name: "Author Three",
-      institution: "Institution Three",
-      notes: ["†"],
-    },
-    {
-      name: "Author Four",
-      institution: "Institution Four",
+      notes: ["*"],
     },
   ]}
-  conference="Conference Name"
+  conference="IEEE International Conference on Robotics and Automation (ICRA 2026)"
   notes={[
     {
       symbol: "*",
-      text: "author note one",
-    },
-    {
-      symbol: "†",
-      text: "author note two",
+      text: "---",
     },
   ]}
   links={[
     {
       name: "Paper",
-      url: "",
+      url: "npthrow_icra2026.pdf",
       icon: "ri:file-pdf-2-line",
     },
     {
       name: "Code",
-      url: "https://github.com/RomanHauksson/academic-project-astro-template",
+      url: "https://github.com/Abdullah-AIST/NP-Throw",
       icon: "ri:github-line",
     },
     {
       name: "arXiv",
       url: "",
       icon: "academicons:arxiv",
-    },
-    {
-      name: "Bluesky",
-      url: "",
-      icon: "ri:bluesky-line"
     }
   ]}
   />
 
 <Video source={outside} />
 
-<HighlightedSection>
+<HighlightedSection bgColor="bg-zinc-300 dark:bg-zinc-200">
 
-## Abstract
-
-This is a live demo for a template you can use to create a simple project page for your research paper. See the code for the template and instructions on how to use it yourself [here](https://github.com/RomanHauksson/academic-project-astro-template). It's made with the [Astro web framework](https://astro.build/) and styled with [Tailwind CSS](https://tailwindcss.com/). You write the content in [MDX](https://mdxjs.com/), which enables markdown formatting like **bold**, _italics_, and ~strikethrough~, as well as custom components like <SmallCaps>small caps.</SmallCaps>
-
+<h1 style="text-align: center"> Abstract </h1>
+</HighlightedSection>
+<HighlightedSection bgColor="bg-zinc-200 dark:bg-zinc-200">
+Robotic systems have adopted throwing skills to enable fast and far-reaching object transportation beyond traditional pick-and-place operations. However, prehensile (grasp-based) throwing limits the range of manipulable objects to those that are feasible to grasp. In contrast, achieving non-prehensile (grasp-free) throwing requires precise control of inertial and frictional forces. In this work, we propose learning a non-prehensile throwing policy via reinforcement learning. Our Markov Decision Process (MDP) formulation enables offline planning of throwing trajectories for random objects—including heavy (790 g) and large (20x20x28 cm) ones—to random target positions as far as 3.5 m and as high as 1.8 m, while operating at the robot’s physical limits (5 m/s). Our simulation-trained policy is transferred to the real world in a zero-shot manner, achieving an average success rate of 85% across different objects and targets. Furthermore, our results demonstrate the policy’s robustness to modeling uncertainties and its generalization to unseen objects, including cylindrical cans and partially-filled bottles.
 </HighlightedSection>
 
-## Figures
+<HighlightedSection bgColor="bg-gray-300 dark:bg-zinc-200">
 
-Use the figure component to display images, videos, equations, or any other element, with an optional caption.
+<h1 style="text-align: center"> Demo: ThrowAnyThing </h1>
+</HighlightedSection>
 
+<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
+
+Randomly swapping objects during exection of trajectories optimized for the WoodBlock. Learned trajectories is stable for arbitrary objects. 
 <Figure>
-  <Image slot="figure" source={transformer} altText="Diagram of the transformer deep learning architecture." />
-  <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  <span slot="title"> Distance: 250 cm & Elevation: 80 cm </span>
+  <YouTubeVideo slot="figure" videoId="JWAr3b1pHvg" />
+  <span slot="caption">Success Rate [9/10]</span>
 </Figure>
 
-## Image comparison slider
-
-An interactive, accessible slider component with keyboard navigation.
-<Figure>
-  <ImageComparison slot="figure" client:load imageUrlOne={dogsDiffc.src} imageUrlTwo={dogsTrue.src} altTextOne="Photo of two dogs running side-by-side in shallow water, lossily compressed using the DiffC algorithm" altTextTwo="Original photo of two dogs running side-by-side in shallow water" />
-  <span slot="caption">A photo of two dogs running side-by-side in shallow water, lossily compressed using the <a href="https://jeremyiv.github.io/diffc-project-page/">DiffC algorithm</a>.</span>
-</Figure>
-
-## Two columns
-
-Use the two columns component to display two columns of content. In this example, the first column contains a figure with a YouTube video and the second column contains a figure with a custom [React](https://react.dev/) component. By default, they display side by side, but if the screen is narrow enough (for example, on mobile), they're arranged vertically.
 
 <TwoColumns>
   <Figure slot="left">
-    <YouTubeVideo slot="figure" videoId="wjZofJX0v4M" />
-    <span slot="caption">Take a look at this YouTube video.</span>
+    <span slot="title"> Distance: 350 cm & Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="3cm91NqeYGs" />
+    <span slot="caption">Success Rate [7/10]</span>
   </Figure>
   <Figure slot="right">
-    <Splat slot="figure" client:idle />
-    <span slot="caption">Now look at this <a href="https://en.wikipedia.org/wiki/Gaussian_splatting">Gaussian splat</a>, rendered with a React component.</span>
+    <span slot="title"> Distance: 200 cm & Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="qZSsmia3iIc" />
+    <span slot="caption">Success Rate [8/10]</span>
   </Figure>
 </TwoColumns>
+</HighlightedSection>
 
-## Heading levels
+<HighlightedSection bgColor="bg-blue-100 dark:bg-zinc-200">
 
-Use headings to divide your content into sections.
+<h1 style="text-align: center">   Method   </h1>
+</HighlightedSection>
 
-### Heading 3
+<HighlightedSection bgColor="bg-blue-50 dark:bg-zinc-200">
+    <Figure>
+    <Image slot="figure" source={ranges} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
 
-Go down a level to heading 3...
+  <Figure>
+    <Image slot="figure" source={observation} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
 
-#### Heading 4
+    <Figure>
+    <Image slot="figure" source={reward} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
 
-...and down again to heading 4.
+  <Figure>
+    <Image slot="figure" source={arch} altText="Diagram of the transformer deep learning architecture." width="500"/>
+    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  </Figure>
 
-## LaTeX
+</HighlightedSection>
 
-You can also add LaTeX formulas, rendered during the build process using [KaTeX](https://katex.org/) so they're quick to load for visitors of your project page. You can write them inline, like this: <LaTeX inline formula="a^2 + b^2 = c^2" />. Or, you can write them as a block:
+<HighlightedSection bgColor="bg-green-100 dark:bg-zinc-200">
 
-<LaTeX formula="\int_a^b f(x) dx" />
+<h1 style="text-align: center">   Simulation Results   </h1>
+</HighlightedSection>
 
-## Tables
+<HighlightedSection bgColor="bg-green-50 dark:bg-zinc-200">
+  * dfsdf
+  <Figure>
+    <Image slot="figure" source={perform} altText="Diagram of the transformer deep learning architecture." />
+    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  </Figure>
+  
+  <Figure>
+    <Image slot="figure" source={ablation} altText="Diagram of the transformer deep learning architecture." width="500" />
+    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  </Figure>
 
-You can add simple tables using [GitHub Flavored Markdown syntax](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-tables):
+  <Figure >
+    <Image slot="figure" source={general} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
 
-| Model | Accuracy | F1 score | Training time (hours) |
-| :--- | :---: | :---: | :---: |
-| BERT-base | 0.89 | 0.87 | 4.5 |
-| RoBERTa-large | 0.92 | 0.91 | 7.2 |
-| DistilBERT | 0.86 | 0.84 | 2.1 |
-| XLNet | 0.90 | 0.89 | 6.8 |
+  <Figure >
+    <Image slot="figure" source={robust} altText="Diagram of the transformer deep learning architecture." width="500"/>
+    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  </Figure>
+
+
+</HighlightedSection>
+
+
+<HighlightedSection bgColor="bg-red-100 dark:bg-zinc-200">
+
+<h1 style="text-align: center">   Real-World Evaluation   </h1>
+</HighlightedSection>
+
+
+
+<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+
+  <Figure >
+    <Image slot="figure" source={real1} altText="Diagram of the transformer deep learning architecture."/>
+    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  </Figure>
+
+    <Figure >
+    <Image slot="figure" source={real2} altText="Diagram of the transformer deep learning architecture."/>
+    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
+  </Figure>
+
+<h2 style="text-align: center">┌──────────────┐</h2>
+<h2 style="text-align: center">   Rubik's Cube   </h2>
+<h3 style="text-align: center">   Small (6x6x6) cm & Light   </h3>
+<h2 style="text-align: center">└──────────────┘</h2>
+
+<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="x6jqhhjJH4g" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="GIFib2o-EPY" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="Hkng3o-BCxk" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+</ThreeColumns>
+
+<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="l4JG_B67stY" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="CWOV4Fy8nJ4" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="NfWMCc8er2E" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="8QVi7EydKUI" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="oSSirqTd2PE" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="vf6R-BODCt0" />
+    <span slot="caption">**Success Rate: [5/10]**</span>
+  </Figure>
+</ThreeColumns>
+
+</HighlightedSection>
+<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+
+<h2 style="text-align: center">┌──────────────┐</h2>
+<h2 style="text-align: center">   Wood Block   </h2>
+<h3 style="text-align: center">   (20x8.5x8.5) cm & Heavy (790 g)   </h3>
+<h2 style="text-align: center">└──────────────┘</h2>
+
+<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="F4qBYxIV1P8" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="BMeLkNe8H7s" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="uKfexIF0KTQ" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="eEMig6cb27A" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="4fua2ubgxvw" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="Hf9fg2WgXDA" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+</ThreeColumns>
+
+<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="Hf9fg2WgXDA" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="HoIbJ15hOSo" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="ihsyZtRRmkQ" />
+    <span slot="caption">**Success Rate: [7/10]**</span>
+  </Figure>
+</ThreeColumns>
+</HighlightedSection>
+<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+
+<h2 style="text-align: center">┌──────────────┐</h2>
+<h2 style="text-align: center">   Chips Can   </h2>
+<h3 style="text-align: center">   Tall (7.5x7.5x25) cm   </h3>
+<h2 style="text-align: center">└──────────────┘</h2>
+
+<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="EI15I6mwNuI" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="Bzit6SSL84c" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="R-jq3gr3Tpo" />
+    <span slot="caption">**Success Rate: [6/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="yM_K2lNbX6k" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="3Ng_icy-lDY" />
+    <span slot="caption">**Success Rate: [8/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="6XGxqWj_754" />
+    <span slot="caption">**Success Rate: [7/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="gMSBYdjpW14" />
+    <span slot="caption">**Success Rate: [7/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="g0Ayius-BW8" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="eebjk28t7yc" />
+    <span slot="caption">**Success Rate: [7/10]**</span>
+  </Figure>
+</ThreeColumns>
+</HighlightedSection>
+<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+
+<h2 style="text-align: center">┌──────────────┐</h2>
+<h2 style="text-align: center">   Partially-Filled Bottle   </h2>
+<h3 style="text-align: center">   (6x6x17) cm & Changing COM    </h3>
+<h2 style="text-align: center">└──────────────┘</h2>
+
+<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="VePm_CXGW9E" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="wBcARuXO3MU" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="CQnAgxSKWe8" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="8w3QSQXf6Js" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="cT5eIqpLXpg" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="mzJxBD7z6Z4" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="XIJNHRe5i9M" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="s9XSBTtdYas" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="MTytJ9FuMfk" />
+    <span slot="caption">**Success Rate: [6/10]**</span>
+  </Figure>
+</ThreeColumns>
+</HighlightedSection>
+<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+
+<h2 style="text-align: center">┌──────────────┐</h2>
+<h2 style="text-align: center">   Large Box   </h2>
+<h3 style="text-align: center">   Large (20x20x28) cm    </h3>
+<h2 style="text-align: center">└──────────────┘</h2>
+
+
+<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="rX0KroIzqb4" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="vx07RX6SGFc" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="WO-j12L2XxY" />
+    <span slot="caption">**Success Rate: [4/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="tOW0Qqh1BhE" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="8Vad3GNWmUo" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="LKesU0XCFrE" />
+    <span slot="caption">**Success Rate: [7/10]**</span>
+  </Figure>
+</ThreeColumns>
+<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
+<ThreeColumns>
+  <Figure slot="left">
+    <span slot="title"> Elevation: 15 cm </span>
+    <YouTubeVideo slot="figure" videoId="t286Xwyulpk" />
+    <span slot="caption">**Success Rate: [10/10]**</span>
+  </Figure>
+  <Figure slot="center">
+    <span slot="title"> Elevation: 80 cm </span>
+    <YouTubeVideo slot="figure" videoId="ULxhk8BQmHY" />
+    <span slot="caption">**Success Rate: [9/10]**</span>
+  </Figure>
+  <Figure slot="right">
+    <span slot="title"> Elevation: 180 cm </span>
+    <YouTubeVideo slot="figure" videoId="JZJoTx6CE5E" />
+    <span slot="caption">**Success Rate: [4/10]**</span>
+  </Figure>
+</ThreeColumns>
+
+</HighlightedSection>
+
+
 
 ## BibTeX citation
 
 ```bibtex
-@misc{roman2024academic,
-  author = "{Roman Hauksson}",
-  title = "Academic Project Page Template",
-  year = "2024",
-  howpublished = "\url{https://research-template.roman.technology}",
+@inproceedings{NP_Throw_ICRA2026,
+  title = "Non-Prehensile Throwing: A Reinforcement Learning Perspective",
+  author = "{Author One, Author Two}",
+  booktitle={ICRA 2026},
+  year={2026},
+  organization={IEEE}
 }
 ```
