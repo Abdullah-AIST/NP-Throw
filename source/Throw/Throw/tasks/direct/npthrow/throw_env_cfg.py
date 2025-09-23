@@ -63,31 +63,31 @@ class EventCfg:
 
     # -- object
     # uncomment to enable randomization
-    #object_physics_material = EventTerm(
-    #    func=mdp.randomize_rigid_body_material,
-    #    min_step_count_between_reset=0, # reset every episode
-    #    mode="reset",
-    #    params={
-    #        "asset_cfg": SceneEntityCfg("block"),
-    #        "static_friction_range": (0.2, 1.0),      # 0.1, 1.0  #0.1 friction is safe for most objects but slower  #0.2, 0.15, 0.0 --- 0.3, 0.25, 0.0
-    #        "dynamic_friction_range": (0.2, 1.0),      # 0.1, 1.0
-    #        "restitution_range": (0.0, 0.5),           # (0.0, 0.5),
-    #        "num_buckets": 500,
-    #        "make_consistent": True,
-    #    },
-    #)
-    #object_abs_mass = EventTerm(
-    #    func=mdp.randomize_rigid_body_mass,
-    #    min_step_count_between_reset=0,
-    #    mode="reset",
-    #    params={
-    #        "asset_cfg": SceneEntityCfg("block"),
-    #        "mass_distribution_params": (0.1, 1.0), # (0.05, 0.5), #rubic,chips: 0.1, liquid:0.2,
-    #        "operation": "abs",
-    #        "distribution": "uniform",
-    #        "recompute_inertia": True, 
-    #    },
-    #)
+    object_physics_material = EventTerm(
+        func=mdp.randomize_rigid_body_material,
+        min_step_count_between_reset=0, # reset every episode
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("block"),
+            "static_friction_range": (0.2, 1.0),      # 0.1, 1.0  #0.1 friction is safe for most objects but slower  #0.2, 0.15, 0.0 --- 0.3, 0.25, 0.0
+            "dynamic_friction_range": (0.2, 1.0),      # 0.1, 1.0
+            "restitution_range": (0.0, 0.5),           # (0.0, 0.5),
+            "num_buckets": 500,
+            "make_consistent": True,
+        },
+    )
+    object_abs_mass = EventTerm(
+        func=mdp.randomize_rigid_body_mass,
+        min_step_count_between_reset=0,
+        mode="reset",
+        params={
+            "asset_cfg": SceneEntityCfg("block"),
+            "mass_distribution_params": (0.1, 1.0), # (0.05, 0.5), #rubic,chips: 0.1, liquid:0.2,
+            "operation": "abs",
+            "distribution": "uniform",
+            "recompute_inertia": True, 
+        },
+    )
 #
 
     #object_com = EventTerm(
@@ -216,7 +216,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     custom_ground = AssetBaseCfg(
         prim_path="/World/envs/env_.*/CustomGround",
         spawn=sim_utils.CuboidCfg(
-            size=(spacing-0.1, spacing-0.1, 0.01),
+            size=(2*spacing-0.1, 2*spacing-0.1, 0.01),
             rigid_props=sim_utils.RigidBodyPropertiesCfg(kinematic_enabled=True),
 
             collision_props=sim_utils.CollisionPropertiesCfg(),
@@ -236,6 +236,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     assets_sizes[:, 2] = sample_beta(n_training + n_eval, 0.05,  0.25, alpha=1.0, beta=1.0,isLog=False).squeeze()       # Uniform distribution for the width/length ratio
 
     assets_colors = torch.rand((n_training + n_eval, 3), device="cuda")
+    #assets_colors = torch.ones_like(assets_colors)*0.5
     assets_frictions = torch.rand((n_training + n_eval, 1), device="cuda") * 0.9 + 0.1
 
 
@@ -250,15 +251,15 @@ class ThrowEnvCfg(DirectRLEnvCfg):
 
 
     # use target="block" for random sized blocks
-    target = "woodBlock"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
-
+    target = "cuboid"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
+    real_targets = {
+                    "real_chips": [0.075, 0.075, 0.250],
+                    "real_woodBlock": [0.2, 0.085, 0.085],
+                    "real_largeBox": [0.2,0.2,0.28],
+                    "real_rubiks": [0.06,0.06,0.06],
+                    "real_liquid": [0.06,0.06,0.17],
+    }
     YCB_tragets = {
-                    "chips": [0.075, 0.075, 0.250],
-                    "woodBlock2": [0.2, 0.085, 0.085],
-                    "largeBox": [0.2,0.2,0.28],
-                    "rubiks": [0.06,0.06,0.06],
-                    "liquid": [0.06,0.06,0.17],
-
                     "sensBlock": [0.1, 0.1, 0.1],
                     "bestBlock": [0.2,0.1,0.05],
 
@@ -298,7 +299,12 @@ class ThrowEnvCfg(DirectRLEnvCfg):
         assets_sizes[:,0] = assets_sizes[:,0]*YCB_tragets[target][0]
         assets_sizes[:,1] = assets_sizes[:,1]*YCB_tragets[target][1]
         assets_sizes[:,2] = assets_sizes[:,2]*YCB_tragets[target][2]
-
+    if target in real_targets.keys():
+        print("Evaluating real object: ", target)
+        assets_sizes = torch.ones_like(assets_sizes)
+        assets_sizes[:,0] = assets_sizes[:,0]*real_targets[target][0]
+        assets_sizes[:,1] = assets_sizes[:,1]*real_targets[target][1]
+        assets_sizes[:,2] = assets_sizes[:,2]*real_targets[target][2]
         
     
     #change from torch to list
@@ -306,7 +312,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     assets_colors = assets_colors.tolist()
     assets_frictions = assets_frictions.tolist()
 
-    if target == "block" or target == "customBlock":
+    if target == "cuboid" or target == "customBlock" or target in real_targets.keys():
         block = RigidObjectCfg(
             prim_path="/World/envs/env_.*/block",
             init_state=RigidObjectCfg.InitialStateCfg(

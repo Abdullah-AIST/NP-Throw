@@ -19,12 +19,26 @@ import LaTeX from "../components/LaTeX.astro";
 
 import { ImageComparison } from "../components/ImageComparison.tsx";
 
-import outside from "../assets/outside.mp4";
+import outside from "../assets/supp.mp4";
+
+import sysID from "../assets/sysID.webm";
+import bleachCleanser from "../assets/bleachCleanser_throw.webm";
+import chips from "../assets/chips_throw.webm";
+import crackerBox from "../assets/crackerBox_throw.webm";
+import largeBox from "../assets/largeBox_throw.webm";
+import mug from "../assets/mug_throw.webm";
+import mustardBottle from "../assets/mustardBottle_throw.webm";
+import pitcher from "../assets/pitcher_throw.webm";
+import powerDrill from "../assets/powerDrill_throw.webm";
+import rubiks from "../assets/rubiks_throw.webm";
+import woodBlock from "../assets/woodBlock_throw.webm";
 
 
 import Splat from "../components/Splat.tsx"
 
 import arch from "../assets/throwArch.png";
+import regress from "../assets/regress.png";
+
 import ablation from "../assets/ablation.png";
 import general from "../assets/general.png";
 import robust from "../assets/robust.png";
@@ -81,25 +95,27 @@ export const components = {pre: CodeBlock, table: Table}
     }
   ]}
   />
-
+<HighlightedSection bgColor="bg-zinc-200 dark:bg-zinc-200">
 <Video source={outside} />
 
-<HighlightedSection bgColor="bg-zinc-300 dark:bg-zinc-200">
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem;">
+      <p><strong>TL;DR</strong></p>
+      <p>We learn an offline planner for non-prehensile throwing trajectories via reinforcement learning.</p>
+      <p>We demonstrate the policy’s generalization, robustness, and its zero-shot sim-to-real transferability.</p>
+  </div>
+</section>
+<h2 style="text-align: left"> Abstract </h2>
 
-<h1 style="text-align: center"> Abstract </h1>
-</HighlightedSection>
-<HighlightedSection bgColor="bg-zinc-200 dark:bg-zinc-200">
 Robotic systems have adopted throwing skills to enable fast and far-reaching object transportation beyond traditional pick-and-place operations. However, prehensile (grasp-based) throwing limits the range of manipulable objects to those that are feasible to grasp. In contrast, achieving non-prehensile (grasp-free) throwing requires precise control of inertial and frictional forces. In this work, we propose learning a non-prehensile throwing policy via reinforcement learning. Our Markov Decision Process (MDP) formulation enables offline planning of throwing trajectories for random objects—including heavy (790 g) and large (20x20x28 cm) ones—to random target positions as far as 3.5 m and as high as 1.8 m, while operating at the robot’s physical limits (5 m/s). Our simulation-trained policy is transferred to the real world in a zero-shot manner, achieving an average success rate of 85% across different objects and targets. Furthermore, our results demonstrate the policy’s robustness to modeling uncertainties and its generalization to unseen objects, including cylindrical cans and partially-filled bottles.
-</HighlightedSection>
-
-<HighlightedSection bgColor="bg-gray-300 dark:bg-zinc-200">
-
-<h1 style="text-align: center"> Demo: ThrowAnyThing </h1>
 </HighlightedSection>
 
 <HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
-Randomly swapping objects during exection of trajectories optimized for the WoodBlock. Learned trajectories is stable for arbitrary objects. 
+<h2 style="text-align: left"> Demo: ThrowAnyThing </h2>
+
+We test NP-Throw’s robustness by applying trajectories optimized for the "Wood Block" to other objects. The policy maintains high success rates, showing robustness to mass and size variations.
+
 <Figure>
   <span slot="title"> Distance: 250 cm & Elevation: 80 cm </span>
   <YouTubeVideo slot="figure" videoId="JWAr3b1pHvg" />
@@ -121,83 +137,16 @@ Randomly swapping objects during exection of trajectories optimized for the Wood
 </TwoColumns>
 </HighlightedSection>
 
-<HighlightedSection bgColor="bg-blue-100 dark:bg-zinc-200">
+<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
-<h1 style="text-align: center">   Method   </h1>
-</HighlightedSection>
-
-<HighlightedSection bgColor="bg-blue-50 dark:bg-zinc-200">
-    <Figure>
-    <Image slot="figure" source={ranges} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-
-  <Figure>
-    <Image slot="figure" source={observation} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-
-    <Figure>
-    <Image slot="figure" source={reward} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-
-  <Figure>
-    <Image slot="figure" source={arch} altText="Diagram of the transformer deep learning architecture." width="500"/>
-    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
-  </Figure>
-
-</HighlightedSection>
-
-<HighlightedSection bgColor="bg-green-100 dark:bg-zinc-200">
-
-<h1 style="text-align: center">   Simulation Results   </h1>
-</HighlightedSection>
-
-<HighlightedSection bgColor="bg-green-50 dark:bg-zinc-200">
-  * dfsdf
-  <Figure>
-    <Image slot="figure" source={perform} altText="Diagram of the transformer deep learning architecture." />
-    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
-  </Figure>
-  
-  <Figure>
-    <Image slot="figure" source={ablation} altText="Diagram of the transformer deep learning architecture." width="500" />
-    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
-  </Figure>
-
-  <Figure >
-    <Image slot="figure" source={general} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-
-  <Figure >
-    <Image slot="figure" source={robust} altText="Diagram of the transformer deep learning architecture." width="500"/>
-    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
-  </Figure>
-
-
-</HighlightedSection>
-
-
-<HighlightedSection bgColor="bg-red-100 dark:bg-zinc-200">
-
-<h1 style="text-align: center">   Real-World Evaluation   </h1>
-</HighlightedSection>
-
-
-
-<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
-
-  <Figure >
-    <Image slot="figure" source={real1} altText="Diagram of the transformer deep learning architecture."/>
-    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
-  </Figure>
-
-    <Figure >
-    <Image slot="figure" source={real2} altText="Diagram of the transformer deep learning architecture."/>
-    <span slot="caption">Diagram of the transformer deep learning architecture.</span>
-  </Figure>
+<h2 style="text-align: left">   Real-World Evaluation   </h2>
+Across five objects and nine target positions, our policy achieved an average of 85% success rate. Most failures were for high targets (180 cm) where friction modeling uncertainties significantly affected the release time.
+<Figure >
+  <Image slot="figure" source={real1} altText="Diagram of the transformer deep learning architecture."/>
+</Figure>
 
 <h2 style="text-align: center">┌──────────────┐</h2>
 <h2 style="text-align: center">   Rubik's Cube   </h2>
-<h3 style="text-align: center">   Small (6x6x6) cm & Light   </h3>
 <h2 style="text-align: center">└──────────────┘</h2>
 
 <h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
@@ -257,11 +206,10 @@ Randomly swapping objects during exection of trajectories optimized for the Wood
 </ThreeColumns>
 
 </HighlightedSection>
-<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
 <h2 style="text-align: center">┌──────────────┐</h2>
 <h2 style="text-align: center">   Wood Block   </h2>
-<h3 style="text-align: center">   (20x8.5x8.5) cm & Heavy (790 g)   </h3>
 <h2 style="text-align: center">└──────────────┘</h2>
 
 <h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
@@ -320,11 +268,10 @@ Randomly swapping objects during exection of trajectories optimized for the Wood
   </Figure>
 </ThreeColumns>
 </HighlightedSection>
-<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
 <h2 style="text-align: center">┌──────────────┐</h2>
 <h2 style="text-align: center">   Chips Can   </h2>
-<h3 style="text-align: center">   Tall (7.5x7.5x25) cm   </h3>
 <h2 style="text-align: center">└──────────────┘</h2>
 
 <h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
@@ -382,11 +329,10 @@ Randomly swapping objects during exection of trajectories optimized for the Wood
   </Figure>
 </ThreeColumns>
 </HighlightedSection>
-<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
 <h2 style="text-align: center">┌──────────────┐</h2>
 <h2 style="text-align: center">   Partially-Filled Bottle   </h2>
-<h3 style="text-align: center">   (6x6x17) cm & Changing COM    </h3>
 <h2 style="text-align: center">└──────────────┘</h2>
 
 <h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
@@ -444,11 +390,10 @@ Randomly swapping objects during exection of trajectories optimized for the Wood
   </Figure>
 </ThreeColumns>
 </HighlightedSection>
-<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
 <h2 style="text-align: center">┌──────────────┐</h2>
 <h2 style="text-align: center">   Large Box   </h2>
-<h3 style="text-align: center">   Large (20x20x28) cm    </h3>
 <h2 style="text-align: center">└──────────────┘</h2>
 
 
@@ -509,6 +454,154 @@ Randomly swapping objects during exection of trajectories optimized for the Wood
 
 </HighlightedSection>
 
+<HighlightedSection bgColor="bg-gray-100 dark:bg-zinc-200">
+
+<h2 style="text-align: left">  Simulation Trajectories   </h2>
+    <div style="display: flex; gap: 20px;">
+      <Video source={rubiks} caption="Rubik's Cube"/>
+      <Video source={chips} caption="Chips Can"/>
+      <Video source={largeBox} caption="Large Box"/>
+    </div>
+    <div style="display: flex; gap: 20px;">
+      <Video source={bleachCleanser} caption="Bleach Cleanser"/>
+      <Video source={mustardBottle} caption="Mustard Bottle"/>
+      <Video source={crackerBox} caption="Cracker Box"/>
+    </div>
+    <div style="display: flex; gap: 20px;">
+      <Video source={mug} caption="Mug"/>
+      <Video source={pitcher} caption="Pitcher"/>
+      <Video source={powerDrill} caption="Power Drill"/>
+    </div>
+
+</HighlightedSection>
+
+
+<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
+
+<h2 style="text-align: left">   Method   </h2>
+
+We formulate the problem as a Markov Decision Process (MDP) and deploy the policy as an offline planner ensuring sim-to-real transferability.
+
+**(1) Markov Decision Process:**
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Observation Space:** For offline planning, we do not use explicit object state. Instead, we assume that the robot state (joint positions and velocities) and object model are sufficient for planning open-loop throwing trajectories. An asymmetric actor-critic architecture is employed, where the critic receives privileged information during training.</p>
+  </div>
+</section>
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Action Space:** An acceleration-based action is well-suited for smooth position/velocity trajectories and control frequency upsampling. The 20 Hz acceleration trajectory is upsampled to 120/480 simulated/real velocity commanded trajectories.</p>
+  </div>
+</section>
+      <LaTeX formula="q_t = q_{t-1} + \dot{q}_{t-1}dt + \frac{1}{2} \ddot{q}_t dt^2 \;\; , \;\; \dot{q}_t = \dot{q}_{t-1} + \ddot{q}_{t}dt" />
+
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Reward Formulation:** We design a weighted reward function combining live, dense, sparse, and regularization terms to promote accurate throws while discouraging undesired behaviors such as double throws, excessive projectile height, and high joint jerk.</p>
+  </div>
+</section>
+
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Initial State Distribution:** We randomize the object model (cuboids) to cover a wide range of sizes, masses, and friction coefficients, including both small/large and light/heavy objects. Target positions are sampled to span long distances (up to 350 cm) and high elevations (up to 180 cm).</p>
+  </div>
+</section>
+
+<div style="display: flex; align-items: flex-start; gap: 20px;">
+  <Figure style="flex: 1;">
+    <Image slot="figure" source={ranges} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
+  <Figure style="flex: 1;">
+    <Image slot="figure" source={observation} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
+  <Figure style="flex: 1;">
+    <Image slot="figure" source={reward} altText="Diagram of the transformer deep learning architecture." width="500"/>
+  </Figure>
+</div>
+
+**(2) Deployment & Planning:**
+
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Offline Trajectoroy Genenration:** Given object model, target position, and initial joint state, the acceleration trajectory is generated recursively by updating the joint acceleration, velocity, and position. Such workflow does not have access to groundtruth simuated/real states mitigating sensory noise and control latenncies.</p>
+  </div>
+</section>
+
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Post-Throw Velocity Damping:** After the throw is detected or predicted—using a regressor trained on object model, target position, and initial joint state—a PD controller is applied to smoothly dampen joint velocities, ensuring stable robot behavior post-release.</p>
+  </div>
+</section>
+
+<section class>
+  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+      <p>**Sim-to-Real Transfer:** We employ population-based system identification to tune simulated actuator gains, ensuring that the position and velocity profiles of predefined trajectories closely match those observed on the real robot.</p>
+  </div>
+</section>
+
+  <div style="display: flex; gap: 20px;">
+    <Figure style="flex: 1;">
+      <Image slot="figure" source={arch} altText="Diagram of the transformer deep learning architecture." width="500"/>
+      <span slot="caption">Recursive planning of throwing trajectories using object model, target location, and initial robot state.</span>
+    </Figure>
+    <Figure style="flex: 1;">
+      <Image slot="figure" source={regress} altText="Diagram of the transformer deep learning architecture." width="500"/>
+      <span slot="caption">Throw timing is predicted using object model, target location, and initial robot state. After release, a PD controller smoothly damps joint velocities for stable post-throw behavior.</span>
+    </Figure>
+  </div>
+
+  <Video source={sysID} width="50%" caption="Population-based system identification of robot dynamics."/>
+
+
+
+</HighlightedSection>
+
+<HighlightedSection bgColor="bg-green-50 dark:bg-zinc-200">
+
+<h2 style="text-align: left"> Simulation Results </h2>
+
+  <section class>
+    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+        <p>**Policy Performance:** The policy achieves high success rates across most configurations, with reduced performance observed for extreme target distances or elevations, large height-to-length ratios, and objects with high static friction. Tall objects and those with high friction are more prone to sticking or rolling, which can affect throw accuracy.</p>
+    </div>
+  </section>
+
+  <Figure>
+    <Image slot="figure" source={perform} altText="Diagram of the transformer deep learning architecture." width="1000%"/>
+  </Figure>
+
+  <section class>
+    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+        <p>**Design Ablations:** Our reward formulation and action space outperform alternative designs, resulting in higher success rates. The selected configuration for control frequency, maximum acceleration, and observation history further maximizes performance.</p>
+    </div>
+  </section>
+  
+  <Figure>
+    <Image slot="figure" source={ablation} altText="Diagram of the transformer deep learning architecture." width="500%" />
+  </Figure>
+
+  <section class>
+    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+        <p>**Generalization to Unseen Objects:** The policy generalizes to a variety of YCB objects, including those with shifted centers of mass. Performance decreases for objects with high mass or friction, primarily due to increased sticking and rolling effects.</p>
+    </div>
+  </section>
+
+  <Figure >
+    <Image slot="figure" source={general} altText="Diagram of the transformer deep learning architecture." width="500%"/>
+  </Figure>
+
+  <section class>
+    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
+        <p>**Robustness to Modeling Uncertainty:** The policy demonstrates robustness to inaccuracies in mass, size, and moderate placement offsets or center of mass shifts. However, significant errors in friction modeling can noticeably reduce policy performance.</p>
+    </div>
+  </section>  
+
+  <Figure >
+    <Image slot="figure" source={robust} altText="Diagram of the transformer deep learning architecture." width="500%"/>
+  </Figure>
+
+
+</HighlightedSection>
 
 
 ## BibTeX citation

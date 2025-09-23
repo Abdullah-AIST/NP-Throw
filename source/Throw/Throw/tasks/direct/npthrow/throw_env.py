@@ -76,7 +76,7 @@ class ThrowEnv(DirectRLEnv):
         self._contactSensor = ContactSensor(self.cfg.contact_sensor)
         self.scene.sensors["contact_sensor"] = self._contactSensor
 
-        self.frame_markers = VisualizationMarkers(self.cfg.frame_object_cfg)
+        #self.frame_markers = VisualizationMarkers(self.cfg.frame_object_cfg)
 
         self.goal_marker = VisualizationMarkers(self.cfg.goal_object_cfg)
 
@@ -317,7 +317,7 @@ class ThrowEnv(DirectRLEnv):
     def _get_observations(self) -> dict:
         obs = self.compute_observation("policy")
         state = self.compute_observation("critic")        
-        self.frame_markers.visualize(self.block_pos_w, self.block_quat_w)
+        #self.frame_markers.visualize(self.block_pos_w, self.block_quat_w)
         target_pos = self.target_pos + self._robot.data.root_link_state_w[:, :3]
         self.goal_marker.visualize(target_pos, self.default_quat)
         observations = {"policy": obs, "critic": state}

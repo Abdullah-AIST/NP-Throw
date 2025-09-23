@@ -1,20 +1,29 @@
 ---
 interface Props {
   source: string;
+  width?: string;
+  height?: string;
+  caption?: string;
 }
 
-const { source } = Astro.props;
+const { source, width = "100%", height = "auto", caption } = Astro.props;
 ---
 
-<div class="w-full flex justify-center">
+<div class="w-full flex flex-col items-center">
   <video
-    class="w-full h-auto aspect-video rounded-lg"
+    class="rounded-lg"
     autoplay
     controls
     muted
     loop
     playsinline
+    style={`width: ${width}; height: ${height};`}
   >
     <source src={source} type="video/mp4" />
   </video>
+  {caption && (
+    <div class="mt-2 text-sm text-gray-600 text-center">
+      {caption}
+    </div>
+  )}
 </div>
