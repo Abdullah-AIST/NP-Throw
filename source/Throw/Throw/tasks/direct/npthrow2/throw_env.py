@@ -165,8 +165,8 @@ class ThrowEnv(DirectRLEnv):
         else:
             dropped = self.block_pos_w[:, 2] < 0.0
             eePos_x = self.eePos_w[:, 0] - self.robot_root_pos_w[:, 0]
-            far_ee_x = eePos_x < -0.5
-            terminated = dropped | far_ee_x
+            #far_ee_x = eePos_x < -0.5
+            terminated = dropped #| far_ee_x
 
         self.num_terminated = torch.sum(terminated).item()
         return terminated, truncated

@@ -116,7 +116,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     RandCOM = False
     RandObjPos = False
 
-    planar = True
+    planar = False
 
     histLen = 1 #action history length
 
@@ -153,7 +153,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     )
 
     # scene
-    spacing = 4
+    spacing = 5
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=spacing, replicate_physics=False)
 
 
@@ -174,11 +174,11 @@ class ThrowEnvCfg(DirectRLEnvCfg):
         init_state=ArticulationCfg.InitialStateCfg(
             joint_pos={
                 "shoulder_pan_joint": 0.0,
-                "shoulder_lift_joint": -math.pi / 4,
-                "elbow_joint": math.pi / 2,  # 1.712,
-                "wrist_1_joint": -math.pi / 4,
+                "shoulder_lift_joint": -3*math.pi / 4,
+                "elbow_joint": -math.pi / 2,  # 1.712,
+                "wrist_1_joint": math.pi / 4,
                 "wrist_2_joint": math.pi / 2,
-                "wrist_3_joint": 0.0,
+                "wrist_3_joint": math.pi,
             },
             pos=(0.0, 0.0, 0.88),
             rot=(1.0, 0.0, 0.0, 0.0),
