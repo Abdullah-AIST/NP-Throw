@@ -27,3 +27,7 @@ pnpm-debug.log*
 src/pages/stress-test.mdx
 
 **/outputs/*
+**/logs/*
+
+**/__pycache__/*
+*.pyc 
