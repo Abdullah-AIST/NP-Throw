@@ -33,7 +33,21 @@ parser.add_argument("--experiment_name", type=str, default=None, help="Experimen
 parser.add_argument("--targetObject", type=str, default=None, help="The object being tested.")
 parser.add_argument("--envSeed", type=int, default=42, help="Seed used for the environment")
 
-parser.add_argument("--Full", type=bool, default=False, help="Whether to include full trajectories in output.")
+parser.add_argument(
+    "--Full", action="store_true", default=False, help="Whether to include full trajectories in output."
+)
+
+parser.add_argument("--ctrlFreq", type=int, default=None, help="Control frequency for the environment.")
+parser.add_argument("--jerkLimit", type=float, default=None, help="Jerk limit for the environment.")
+parser.add_argument("--histLen", type=int, default=None, help="History length for the environment.")
+
+parser.add_argument("--numEpochs", type=int, default=None, help="Number of epochs for training.")
+
+parser.add_argument("--DOF", type=int, default=None, help="Degrees of freedom for the environment.")
+
+parser.add_argument("--controlMode", type=str, default=None, help="Control mode for the environment.")
+
+
 
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
@@ -115,6 +129,40 @@ def main():
     clip_obs = agent_cfg["params"]["env"].get("clip_observations", math.inf)
     clip_actions = agent_cfg["params"]["env"].get("clip_actions", math.inf)
 
+    if args_cli.ctrlFreq is not None:
+        print(f"[INFO] Setting control frequency to {args_cli.ctrlFreq} Hz.")
+        env_cfg.ctrl_Freq = args_cli.ctrlFreq
+        env_cfg.decimation = int(env_cfg.sim_Freq / args_cli.ctrlFreq)
+        env_cfg.maxEp_steps = int(env_cfg.TrajTime*args_cli.ctrlFreq) # 48*3=144
+        env_cfg.max_Steps = int(env_cfg.episode_length_s * args_cli.ctrlFreq)  # freq(120)/decimation(2)
+        env_cfg.contact_sensor.update_period=1/args_cli.ctrlFreq
+
+
+    if args_cli.jerkLimit is not None:
+        print(f"[INFO] Setting jerk limit to {args_cli.jerkLimit}.")
+        env_cfg.jerkLimit = args_cli.jerkLimit
+
+    if args_cli.histLen is not None:
+        print(f"[INFO] Setting history length to {args_cli.histLen}.")
+        env_cfg.histLen = args_cli.histLen
+        env_cfg.observation_space =  7 + (env_cfg.DOF*4)*args_cli.histLen +3 #+1#+ 9 
+        env_cfg.state_space =   38 + (env_cfg.DOF*4)*args_cli.histLen + 3 + 1 +3*env_cfg.RandCOM #+1 # 31 + 1 + 2 + 6 + 3
+
+    if args_cli.numEpochs is not None:
+        print(f"[INFO] Setting max epochs to {args_cli.numEpochs}.")
+        agent_cfg["params"]["config"]["max_epochs"] = args_cli.numEpochs
+    
+    if args_cli.DOF is not None:
+        print(f"[INFO] Setting DOF to {args_cli.DOF}.")
+        env_cfg.DOF = args_cli.DOF
+        env_cfg.action_space = env_cfg.DOF  # spaces.Box(-2, 2, shape=(6,))
+        env_cfg.observation_space =  7 + (env_cfg.DOF*4)*env_cfg.histLen +3 #+1#+ 9 
+        env_cfg.state_space =   38 + (env_cfg.DOF*4)*env_cfg.histLen + 3 + 1 +3*env_cfg.RandCOM #+1 # 31 + 1 + 2 + 6 + 3
+    
+    if args_cli.controlMode is not None:
+        print(f"[INFO] Setting control mode to {args_cli.controlMode}.")
+        env_cfg.actionMode = args_cli.controlMode
+        
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)
     # wrap for video recording
@@ -171,7 +219,7 @@ def main():
     # reset environment
     success_len = 5
     n_envs = env.unwrapped.num_envs #512
-    nsteps = 180
+    nsteps = 1800
     #OBS = torch.zeros((nsteps+1, n_envs, state.shape[1]), device="cuda")
     #ACTION = torch.zeros((nsteps+1, n_envs, 6), device="cuda")
     #SUCCESS = torch.zeros((success_len+1, n_envs), device="cuda")
@@ -192,7 +240,7 @@ def main():
     ACTION = []
     SUCCESS = []
     STATES = []
-    JOINTACC = []
+    JOINTACT = []
     Times = []
     for ind in range(nsteps):
         with torch.inference_mode():
@@ -212,8 +260,8 @@ def main():
             obs, _, dones, extras = env.step(actions)
 
             if dones.all():
-                JointAcc = extras["episode"]["JointAcc"]
-                JOINTACC.append(JointAcc)
+                cmdJerk = extras["episode"]["cmdJerk"]
+                JOINTACT.append(cmdJerk)
 
                 success = extras["episode"]["is_success"].to(int)
                 SUCCESS.append(success)
@@ -234,8 +282,8 @@ def main():
             success = extras["episode"]["is_success"].to(int)
             SUCCESS.append(success)
 
-            JointAcc = extras["episode"]["JointAcc"]
-            JOINTACC.append(JointAcc)
+            cmdJerk = extras["episode"]["cmdJerk"]
+            JOINTACT.append(cmdJerk)
 
 
             block_state = extras["episode"]["block_state"]
@@ -261,11 +309,11 @@ def main():
     OBS = torch.stack(OBS, dim=0)
     ACTION = torch.stack(ACTION, dim=0)
     SUCCESS = torch.stack(SUCCESS, dim=0)
-    JOINTACC = torch.stack(JOINTACC, dim=0)
+    JOINTACT = torch.stack(JOINTACT, dim=0)
     STATES = torch.stack(STATES, dim=0)
     is_success = SUCCESS[-success_len - 1 : -1, :].sum(dim=0) == success_len
     logTraj = is_success
-    print(f"seed {seed} -- n_success: {sum(logTraj).item()}")
+    print(f"seed {seed} -- success rate: {sum(logTraj).item()/n_envs*100:.2f}%")
     Summary = torch.cat((is_success.reshape(-1, 1), STATES[0]), dim=-1)
 
     
@@ -287,10 +335,10 @@ def main():
             np.savetxt(actions_traj_path, actions_traj, delimiter=",")
 
             jointacc_traj_path = (
-                f"results/rl_games/{name}/{experiment_name}/{target}/seed{envSeed}/{traj_ind:03d}/jointacc_traj.txt"
+                f"results/rl_games/{name}/{experiment_name}/{target}/seed{envSeed}/{traj_ind:03d}/jointact_traj.txt"
             )
-            jointacc_traj = JOINTACC[:, i].cpu().numpy()
-            np.savetxt(jointacc_traj_path, jointacc_traj, delimiter=",")
+            jointact_traj = JOINTACT[:, i].cpu().numpy()
+            np.savetxt(jointacc_traj_path, jointact_traj, delimiter=",")
 
             obs_traj_path = f"results/rl_games/{name}/{experiment_name}/{target}/seed{envSeed}/{traj_ind:03d}/obs_traj.txt"
             obs_traj = OBS[:, i].cpu().numpy()

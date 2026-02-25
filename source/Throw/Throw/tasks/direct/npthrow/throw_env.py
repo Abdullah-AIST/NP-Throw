@@ -123,7 +123,7 @@ class ThrowEnv(DirectRLEnv):
         small_acc = (torch.abs(delta_acc) < max_delta_acc).float()
         clipped_acc = self.cmd_acc - torch.clip(delta_acc, min=-max_delta_acc, max=max_delta_acc)
         acc = acc * small_acc + (1-small_acc) * clipped_acc
-        self.cmd_acc = self.actions * self.cfg.action_scale * (1-post_throw.float()) + acc * post_throw.float()
+        self.cmd_acc = self.actions * self.cfg.action_scale #* (1-post_throw.float()) + acc * post_throw.float()
 
 
         vel_est = self.joint_qd + self.cmd_acc * dt
@@ -353,7 +353,7 @@ class ThrowEnv(DirectRLEnv):
         jointAcc_norm = torch.linalg.vector_norm(self.cmd_acc, dim=1, ord=1)
         jointAcc_rate_penalty = torch.linalg.vector_norm((self.cmd_acc - self.last_cmd_acc), dim=1, ord=1)
         self.last_cmd_acc = self.cmd_acc.clone()
-        jointVel_norm = torch.linalg.vector_norm(self.joint_vel, dim=1, ord=2)
+        jointVel_norm = torch.linalg.vector_norm(self.joint_qd, dim=1, ord=2)
 
 
         target_pos =  self.target_pos + self._robot.data.root_link_state_w[:, :3]
@@ -403,11 +403,15 @@ class ThrowEnv(DirectRLEnv):
 
             - self.cfg.reg_rewScale * jointAcc_norm* reg_scale
             - self.cfg.reg_rewScale * jointAcc_rate_penalty*reg_scale
-            #-self.cfg.reg_rewScale * jointVel_norm* reg_scale*post_throw.float()*10
+            + (3 -jointVel_norm)* reg_scale*post_throw.float()*100
 
 
         )
 
+        block_pos = self.block_pos_w - self.robot_root_pos_w
+        ee_pos = self.eePos_w - self.robot_root_pos_w
+        (block_pos_rel, _) = subtract_frame_transforms(ee_pos, self.eeQuat_w, block_pos, self.block_quat_w)
+        #block_pos_rel[:, 2] -= self.assets_sizes[:, 2] / 2  # account for block radius
 
 
         self.extras["log"] = {
@@ -424,8 +428,8 @@ class ThrowEnv(DirectRLEnv):
             "jointAcc_norm": jointAcc_norm,
             "jointVel_norm": jointVel_norm,
 
-            "block_state": torch.cat((self.block_pos_w- self._robot.data.root_link_state_w[:, :3], self.block_quat_w, self.block_vel, post_throw.reshape(-1,1)), dim=-1),
-            "ee_state": torch.cat((self.eePos_w, self.eeQuat_w, self.eeVel), dim=-1),
+            "block_state": torch.cat((block_pos_rel, self.block_quat_w, self.block_vel, post_throw.reshape(-1,1)), dim=-1),
+            "ee_state": torch.cat((ee_pos, self.eeQuat_w, self.eeVel), dim=-1),
             "joint_state": torch.cat((self.joint_pos, self.joint_vel), dim=-1),
             "target_pos": self.target_pos,
             "ObjectModel": torch.cat((self.block_mass, self.block_staticFriction, self.block_dynamicFriction, self.block_restitution, self.real_assets_sizes, self.block_com, self.x_shift.reshape(-1,1)), dim=-1),

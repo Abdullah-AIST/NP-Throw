@@ -285,8 +285,8 @@ def randomize_rigid_body_com_sdf(
 
     if assets_coms is None:
         # sample random coms in range [-0.5, 0.5]
-        range_low = torch.tensor(3*[-0.25], device="cpu")
-        range_high = torch.tensor(3*[0.25], device="cpu")
+        range_low = torch.tensor(3*[-0.5], device="cpu")
+        range_high = torch.tensor(3*[0.5], device="cpu")
         assets_coms = math_utils.sample_uniform(
             range_low, range_high, (len(env_ids), 3), device="cpu"
         ).tolist()

@@ -110,7 +110,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     AccRate = 0.2             #0.5 seems to streak a balance``
     action_scale = 40.0
 
-    training = True
+    training = False
     evaluating = (not training) 
 
     RandCOM = False
@@ -186,8 +186,10 @@ class ThrowEnvCfg(DirectRLEnvCfg):
         actuators={
             "arm": ImplicitActuatorCfg(
                 joint_names_expr=[".*"],
-                stiffness = {'shoulder_pan_joint': 80.66, 'shoulder_lift_joint': 21136.47, 'elbow_joint': 18552.5, 'wrist_1_joint': 17674.29, 'wrist_2_joint': 11161.41, 'wrist_3_joint': 15187.05},
-                damping = {'shoulder_pan_joint': 297.0, 'shoulder_lift_joint': 3653.27, 'elbow_joint': 962.81, 'wrist_1_joint': 602.18, 'wrist_2_joint': 370.22, 'wrist_3_joint': 490.1},
+                #stiffness = {'shoulder_pan_joint': 80.66, 'shoulder_lift_joint': 21136.47, 'elbow_joint': 18552.5, 'wrist_1_joint': 17674.29, 'wrist_2_joint': 11161.41, 'wrist_3_joint': 15187.05},
+                #damping = {'shoulder_pan_joint': 297.0, 'shoulder_lift_joint': 3653.27, 'elbow_joint': 962.81, 'wrist_1_joint': 602.18, 'wrist_2_joint': 370.22, 'wrist_3_joint': 490.1},
+                stiffness = {'shoulder_pan_joint': 60.16, 'shoulder_lift_joint': 21126.01, 'elbow_joint': 18435.25, 'wrist_1_joint': 18707.76, 'wrist_2_joint': 1.35, 'wrist_3_joint': 19320.57},
+                damping = {'shoulder_pan_joint': 286.36, 'shoulder_lift_joint': 3650.51, 'elbow_joint': 810.11, 'wrist_1_joint': 598.96, 'wrist_2_joint': 3.06, 'wrist_3_joint': 606.21},
                )
         },
     )

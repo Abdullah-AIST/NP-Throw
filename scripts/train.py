@@ -41,6 +41,14 @@ parser.add_argument(
 
 parser.add_argument("--experiment_name", type=str, default=None, help="Experiment_name for logging.")
 
+parser.add_argument("--ctrlFreq", type=int, default=None, help="Control frequency for the environment.")
+parser.add_argument("--jerkLimit", type=float, default=None, help="Jerk limit for the environment.")
+parser.add_argument("--histLen", type=int, default=None, help="History length for the environment.")
+
+parser.add_argument("--numEpochs", type=int, default=None, help="Number of epochs for training.")
+
+parser.add_argument("--DOF", type=int, default=None, help="Degrees of freedom for the environment.")
+parser.add_argument("--controlMode", type=str, default=None, help="Control mode for the environment.")
 
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
@@ -123,7 +131,41 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     # set the environment seed (after multi-gpu config for updated rank from agent seed)
     # note: certain randomizations occur in the environment initialization so we set the seed here
     env_cfg.seed = agent_cfg["params"]["seed"]
+    if args_cli.ctrlFreq is not None:
+        print(f"[INFO] Setting control frequency to {args_cli.ctrlFreq} Hz.")
+        env_cfg.ctrl_Freq = args_cli.ctrlFreq
+        env_cfg.decimation = int(env_cfg.sim_Freq / args_cli.ctrlFreq)
+        env_cfg.maxEp_steps = int(env_cfg.TrajTime*args_cli.ctrlFreq) # 48*3=144
+        env_cfg.max_Steps = int(env_cfg.episode_length_s * args_cli.ctrlFreq)  # freq(120)/decimation(2)
+        env_cfg.contact_sensor.update_period=1/args_cli.ctrlFreq
 
+
+    if args_cli.jerkLimit is not None:
+        print(f"[INFO] Setting jerk limit to {args_cli.jerkLimit}.")
+        env_cfg.jerkLimit = args_cli.jerkLimit
+
+    if args_cli.histLen is not None:
+        print(f"[INFO] Setting history length to {args_cli.histLen}.")
+        env_cfg.histLen = args_cli.histLen
+        env_cfg.observation_space =  7 + (env_cfg.DOF*4)*args_cli.histLen +3 #+1#+ 9 
+        env_cfg.state_space =   38 + (env_cfg.DOF*4)*args_cli.histLen + 3 + 1 +3*env_cfg.RandCOM #+1 # 31 + 1 + 2 + 6 + 3
+
+
+    if args_cli.numEpochs is not None:
+        print(f"[INFO] Setting max epochs to {args_cli.numEpochs}.")
+        agent_cfg["params"]["config"]["max_epochs"] = args_cli.numEpochs
+
+    if args_cli.DOF is not None:
+        print(f"[INFO] Setting DOF to {args_cli.DOF}.")
+        env_cfg.DOF = args_cli.DOF
+        env_cfg.action_space = env_cfg.DOF  # spaces.Box(-2, 2, shape=(6,))
+        env_cfg.observation_space =  7 + (env_cfg.DOF*4)*env_cfg.histLen +3 #+1#+ 9 
+        env_cfg.state_space =   38 + (env_cfg.DOF*4)*env_cfg.histLen + 3 + 1 +3*env_cfg.RandCOM #+1 # 31 + 1 + 2 + 6 + 3
+    
+    if args_cli.controlMode is not None:
+        print(f"[INFO] Setting control mode to {args_cli.controlMode}.")
+        env_cfg.actionMode = args_cli.controlMode
+        
     # specify directory for logging experiments
     config_name = agent_cfg["params"]["config"]["name"]
     log_root_path = os.path.join("logs", "rl_games", config_name)

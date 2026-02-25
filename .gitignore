@@ -28,6 +28,7 @@ src/pages/stress-test.mdx
 
 **/outputs/*
 **/logs/*
+**/results/*
 
 **/__pycache__/*
 *.pyc 
