@@ -61,9 +61,9 @@ class EventCfg:
         mode="reset",
         params={
             "asset_cfg": SceneEntityCfg("block"),
-            "static_friction_range": (0.5, 0.5),      # 0.1, 1.0  #0.1 friction is safe for most objects but slower  #0.2, 0.15, 0.0 --- 0.3, 0.25, 0.0
-            "dynamic_friction_range": (0.5, 0.5),      # 0.1, 1.0
-            "restitution_range": (0.25, 0.25),           # (0.0, 0.5),
+            "static_friction_range": (0.5, 0.5),      # 0.4
+            "dynamic_friction_range": (0.2, 0.2),      # 0.2 # rubiks 0.35 other 0.25
+            "restitution_range": (0.0, 0.0),           # (0.0, 0.5),
             "num_buckets": 5000,
             "make_consistent": True,
         },
@@ -75,7 +75,7 @@ class EventCfg:
         mode="reset",
         params={
             "asset_cfg": SceneEntityCfg("block"),
-            "mass_distribution_params": (0.5, 0.5), # (0.05, 0.5), #rubic,chips: 0.1, liquid:0.2,
+            "mass_distribution_params": (0.1, 0.1), # (0.05, 0.5), #rubic,chips: 0.1, liquid:0.2, # 0.1
             "operation": "abs",
             "distribution": "uniform",
             "recompute_inertia": True, 
@@ -107,7 +107,7 @@ class EventCfg:
 
 @configclass
 class ThrowEnvCfg(DirectRLEnvCfg):
-    jerkLimit = 200.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
+    jerkLimit = 100.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
     ctrl_Freq = 20 #20*1.5
 
     max_vel = 3.0
@@ -237,17 +237,22 @@ class ThrowEnvCfg(DirectRLEnvCfg):
 
 
     # use target="cuboid" for random sized blocks
-    target = "cuboid"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
+    target = "real_woodBlock"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
     real_targets = {
                     "real_chips": [0.075, 0.075, 0.250],
                     "real_woodBlock": [0.2, 0.085, 0.085],
                     "real_largeBox": [0.2,0.2,0.28],
                     "real_rubiks": [0.06,0.06,0.06],
-                    "real_liquid": [0.06,0.06,0.17],
+                    "real_liquid": [0.05,0.05,0.15],
+                    "real_pitcher": [0.108,0.108,0.235],
+                    "real_teddy": [0.05,0.05,0.05],
+                    "real_tissue": [0.1,0.1,0.05],
+
+                    "sensBlock": [0.05, 0.05, 0.2],
+                    "bestBlock": [0.05,0.05,0.25],
+
     }
     YCB_tragets = {
-                    "sensBlock": [0.1, 0.1, 0.1],
-                    "bestBlock": [0.2,0.1,0.05],
 
                     "dexCube": [0.1, 0.1, 0.1],
                     #"crackerBox": [0.06, 0.158, 0.21], 

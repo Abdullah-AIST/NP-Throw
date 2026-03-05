@@ -49,6 +49,8 @@ parser.add_argument("--numEpochs", type=int, default=None, help="Number of epoch
 
 parser.add_argument("--DOF", type=int, default=None, help="Degrees of freedom for the environment.")
 parser.add_argument("--controlMode", type=str, default=None, help="Control mode for the environment.")
+parser.add_argument("--noiseLevel", type=float, default=None, help="Noise level for the environment.")
+
 
 # append AppLauncher cli args
 AppLauncher.add_app_launcher_args(parser)
@@ -165,6 +167,10 @@ def main(env_cfg: ManagerBasedRLEnvCfg | DirectRLEnvCfg | DirectMARLEnvCfg, agen
     if args_cli.controlMode is not None:
         print(f"[INFO] Setting control mode to {args_cli.controlMode}.")
         env_cfg.actionMode = args_cli.controlMode
+
+    if args_cli.noiseLevel is not None:
+        print(f"[INFO] Setting noise level to {args_cli.noiseLevel}.")
+        env_cfg.noiseLevel = args_cli.noiseLevel
         
     # specify directory for logging experiments
     config_name = agent_cfg["params"]["config"]["name"]

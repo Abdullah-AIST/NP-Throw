@@ -47,6 +47,7 @@ parser.add_argument("--DOF", type=int, default=None, help="Degrees of freedom fo
 
 parser.add_argument("--controlMode", type=str, default=None, help="Control mode for the environment.")
 
+parser.add_argument("--noiseLevel", type=float, default=None, help="Noise level for the environment.")
 
 
 # append AppLauncher cli args
@@ -162,6 +163,10 @@ def main():
     if args_cli.controlMode is not None:
         print(f"[INFO] Setting control mode to {args_cli.controlMode}.")
         env_cfg.actionMode = args_cli.controlMode
+    
+    if args_cli.noiseLevel is not None:
+        print(f"[INFO] Setting noise level to {args_cli.noiseLevel}.")
+        env_cfg.noiseLevel = args_cli.noiseLevel
         
     # create isaac environment
     env = gym.make(args_cli.task, cfg=env_cfg, render_mode="rgb_array" if args_cli.video else None)

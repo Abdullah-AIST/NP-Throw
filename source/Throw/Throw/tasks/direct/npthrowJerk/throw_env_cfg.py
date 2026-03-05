@@ -107,13 +107,13 @@ class EventCfg:
 
 @configclass
 class ThrowEnvCfg(DirectRLEnvCfg):
-    jerkLimit = 200.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
+    jerkLimit = 150.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
     ctrl_Freq = 20 #20*1.5
 
     max_vel = 3.0
     max_acc = 40.0
 
-    training = False
+    training = True
     evaluating = (not training) 
 
     RandCOM = False
@@ -124,6 +124,8 @@ class ThrowEnvCfg(DirectRLEnvCfg):
 
     muRobust = False
     histLen = 1 #action history length
+
+    noiseLevel = 0.0 #0.01
 
     DOF = 3 if planar else 6
 
@@ -237,7 +239,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
 
 
     # use target="cuboid" for random sized blocks
-    target = "pitcher"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
+    target = "cuboid"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
     real_targets = {
                     "real_chips": [0.075, 0.075, 0.250],
                     "real_woodBlock": [0.2, 0.085, 0.085],

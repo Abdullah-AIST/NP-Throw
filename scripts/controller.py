@@ -1,3 +1,4 @@
+from pprint import pprint
 import rtde_control
 import rtde_receive
 from rtde_control import RTDEControlInterface as RTDEControl
@@ -8,8 +9,8 @@ import time
 
 class ur5e_controller:
     def __init__(self, ip_address = "192.168.56.101",
-                rtde_frequency = 480,
-                control_freq = 60): 
+                rtde_frequency = 500,
+                control_freq = 20): 
         
         self.rtde_c = rtde_control.RTDEControlInterface(ip_address, rtde_frequency)
         self.rtde_r = rtde_receive.RTDEReceiveInterface(ip_address, rtde_frequency)
@@ -20,7 +21,7 @@ class ur5e_controller:
         self.n_steps = int(rtde_frequency/control_freq)
 
         self.max_velocity = 3.14
-        self.max_acceleration = 30
+        self.max_acceleration = 35
         self.lookahead_time = 0.03
         self.gain = 1000
 
@@ -90,6 +91,33 @@ class ur5e_controller:
             self.rtde_c.waitPeriod(t_start)
         
         self.joint_qdd = joint_qdd.copy()
+
+    
+    def servoJ_Jerk(self, joint_qddd):
+        """ move to joint position with servoJ """
+        """ Implicit integration of joint acceleration to joint position and velocity """
+        dt = self.dt/self.n_steps
+        for step in range(self.n_steps):
+            self.joint_q  = self.joint_q  + self.joint_qd  * dt + 0.5*self.joint_qdd * dt**2 + (1/6)*joint_qddd * dt**3
+            self.joint_qd = self.joint_qd + self.joint_qdd * dt + 0.5*joint_qddd * dt**2
+            self.joint_qdd = self.joint_qdd + joint_qddd * dt
+
+            self.joint_qd = np.clip(self.joint_qd, -3, 3)
+            self.joint_qdd = np.clip(self.joint_qdd, -self.max_acceleration, self.max_acceleration)
+
+            real_q = self.getActualQ()
+            #real_qd = self.getActualQd()
+            q_error = self.joint_q - real_q
+            #qd_error = self.joint_qd - real_qd
+            
+            cmd_vel = self.joint_qd + 1*(q_error) #+ 0.01*(qd_error)
+            cmd_vel = np.clip(cmd_vel,-3,3)
+            t_start = self.rtde_c.initPeriod()
+            #self.rtde_c.servoJ(self.joint_q, self.max_velocity, self.max_acceleration, self.dt/self.n_steps, self.lookahead_time, self.gain)
+            self.rtde_c.speedJ(cmd_vel, self.max_acceleration, dt)
+            self.rtde_c.waitPeriod(t_start)
+        #print("q_error:", q_error)
+        #print("qd_error:", qd_error)
 
     def servoJ_position(self, joint_q):
         """ move to joint position with servoJ """
