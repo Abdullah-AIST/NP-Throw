@@ -61,7 +61,7 @@ params:
     score_to_win: 100000000
     max_epochs: 1000
     save_best_after: 10
-    save_frequency: 500
+    save_frequency: 5000
     grad_norm: 1.0
     entropy_coef: 0
     truncate_grads: True

@@ -36,7 +36,7 @@ params:
   load_checkpoint: false
   load_path: ''
   config:
-    name: Throw_Bin
+    name: NPThrowJerk
     env_name: rlgpu
     device: cuda:0
     device_name: cuda:0
@@ -59,7 +59,7 @@ params:
     score_to_win: 100000000
     max_epochs: 1000
     save_best_after: 10
-    save_frequency: 500
+    save_frequency: 5000
     grad_norm: 1.0
     entropy_coef: 0
     truncate_grads: true
@@ -98,5 +98,5 @@ params:
             name: default
           regularizer:
             name: None
-    train_dir: /home/abdullah/Research/Isaac_Tasks/Throw/logs/rl_games/Throw_Bin
-    full_experiment_name: Default_seed0
+    train_dir: /home/abdullah/Research/Isaac_Tasks/NP-Throw/logs/rl_games/NPThrowJerk
+    full_experiment_name: Throw_1hist_20Hz_100Limit_Opt_seed0

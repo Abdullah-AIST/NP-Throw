@@ -63,7 +63,7 @@ class EventCfg:
             "asset_cfg": SceneEntityCfg("block"),
             "static_friction_range": (0.2, 1.0),      # 0.1, 1.0  #0.1 friction is safe for most objects but slower  #0.2, 0.15, 0.0 --- 0.3, 0.25, 0.0
             "dynamic_friction_range": (0.2, 1.0),      # 0.1, 1.0
-            "restitution_range": (0.0, 0.5),           # (0.0, 0.5),
+            "restitution_range": (0.0, 0.5),           # (0.0, 0.5), # irrelevant for throwing without bounces, but can add some variability to the dynamics
             "num_buckets": 5000,
             "make_consistent": True,
         },
@@ -107,8 +107,11 @@ class EventCfg:
 
 @configclass
 class ThrowEnvCfg(DirectRLEnvCfg):
-    AccRate = 0.2             #0.5 seems to streak a balance``
-    action_scale = 40.0
+    jerkLimit = 100.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
+    ctrl_Freq = 20 #20*1.5
+
+    max_vel = 3.0
+    max_acc = 40.0
 
     training = False
     evaluating = (not training) 
@@ -117,18 +120,23 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     RandObjPos = False
 
     planar = True
+    actionMode = "jerk" # "pos", "vel", "acc", "jerk"
 
+    muRobust = False
     histLen = 1 #action history length
 
+    noiseLevel = 0.0 #0.01
+
+    DOF = 3 if planar else 6
+
     sim_Freq = 120
-    ctrl_Freq = 20 #20*1.5
     decimation = int(sim_Freq / ctrl_Freq)
     nTrajsPerEpisode = 1 # if not evaluating else 1
     TrajTime = 3.2 #if (not training or  RandCOM or RandObjPos) else 3.0
     episode_length_s = nTrajsPerEpisode* TrajTime #if not evaluating else 3 # 48*3/60=2.4
-    action_space = 3 if planar else 6 #spaces.Box(-2, 2, shape=(6,))
-    observation_space =  7 + (9 + 9*(not planar))*histLen +3 #+1#+ 9 
-    state_space =   38 + (9+9*(not planar))*histLen + 3 + 1 +3*RandCOM #+1 # 31 + 1 + 2 + 6 + 3
+    action_space = DOF  #spaces.Box(-2, 2, shape=(6,))
+    observation_space =  7 + (DOF*4)*histLen +3 #+1#+ 9 
+    state_space =   38 + (DOF*4)*histLen + 3 + 1 +3*RandCOM #+1 # 31 + 1 + 2 + 6 + 3
     maxEp_steps = int(TrajTime*ctrl_Freq) # 48*3=144
     max_Steps = int(episode_length_s * ctrl_Freq)  # freq(120)/decimation(2)
     
@@ -161,7 +169,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     robot = ArticulationCfg(
         prim_path="/World/envs/env_.*/Robot",
         spawn=sim_utils.UsdFileCfg(
-            usd_path="./assets/ur5e_newTrayBasic.usd",
+            usd_path="./assets/ur5e.usd",
             activate_contact_sensors=True,
             rigid_props=sim_utils.RigidBodyPropertiesCfg(
                 disable_gravity=False,
@@ -186,10 +194,8 @@ class ThrowEnvCfg(DirectRLEnvCfg):
         actuators={
             "arm": ImplicitActuatorCfg(
                 joint_names_expr=[".*"],
-                #stiffness = {'shoulder_pan_joint': 80.66, 'shoulder_lift_joint': 21136.47, 'elbow_joint': 18552.5, 'wrist_1_joint': 17674.29, 'wrist_2_joint': 11161.41, 'wrist_3_joint': 15187.05},
-                #damping = {'shoulder_pan_joint': 297.0, 'shoulder_lift_joint': 3653.27, 'elbow_joint': 962.81, 'wrist_1_joint': 602.18, 'wrist_2_joint': 370.22, 'wrist_3_joint': 490.1},
-                stiffness = {'shoulder_pan_joint': 60.16, 'shoulder_lift_joint': 21126.01, 'elbow_joint': 18435.25, 'wrist_1_joint': 18707.76, 'wrist_2_joint': 1.35, 'wrist_3_joint': 19320.57},
-                damping = {'shoulder_pan_joint': 286.36, 'shoulder_lift_joint': 3650.51, 'elbow_joint': 810.11, 'wrist_1_joint': 598.96, 'wrist_2_joint': 3.06, 'wrist_3_joint': 606.21},
+                stiffness = {'shoulder_pan_joint': 80.66, 'shoulder_lift_joint': 21136.47, 'elbow_joint': 18552.5, 'wrist_1_joint': 17674.29, 'wrist_2_joint': 11161.41, 'wrist_3_joint': 15187.05},
+                damping = {'shoulder_pan_joint': 297.0, 'shoulder_lift_joint': 3653.27, 'elbow_joint': 962.81, 'wrist_1_joint': 602.18, 'wrist_2_joint': 370.22, 'wrist_3_joint': 490.1},
                )
         },
     )
@@ -232,7 +238,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     )
 
 
-    # use target="block" for random sized blocks
+    # use target="cuboid" for random sized blocks
     target = "cuboid"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
     real_targets = {
                     "real_chips": [0.075, 0.075, 0.250],
@@ -404,13 +410,17 @@ class ThrowEnvCfg(DirectRLEnvCfg):
 
 
     #change from torch to list
-    assets_sizes = assets_sizes.tolist()
     assets_colors = assets_colors.tolist()
     assets_coms = assets_coms.tolist()
-    
-    events.randomize_scale.params["assets_sizes"] = assets_sizes
     events.randomize_scale.params["assets_colors"] = assets_colors
     events.randomize_COM.params["assets_coms"] = assets_coms
+    if target in YCB_tragets.keys():
+        events.randomize_scale.params["assets_sizes"] = torch.ones_like(assets_sizes).tolist()
+        assets_sizes = assets_sizes.tolist()
+    else:   
+        assets_sizes = assets_sizes.tolist()
+        events.randomize_scale.params["assets_sizes"] = assets_sizes
+    
 
 
 

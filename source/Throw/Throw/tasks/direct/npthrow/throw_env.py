@@ -59,6 +59,10 @@ class ThrowEnv(DirectRLEnv):
 
         self.scale = 0.0
         
+        if self.cfg.DOF == 3:
+            self.active_joints = [1,2,3]
+        if self.cfg.DOF == 2:
+            self.active_joints = [1,3]
 
 
 
@@ -90,64 +94,42 @@ class ThrowEnv(DirectRLEnv):
     # pre-physics step calls
     def _pre_physics_step(self, actions: torch.Tensor):
         """Process Jerk actions from  to joint position"""
-
-        dt = self.cfg.sim.dt*self.cfg.decimation
-
+        dt = self.cfg.sim.dt * self.cfg.decimation
         if self.cfg.planar:
-            self.actions[:,1:4] = actions[:,:3].clone()
+            self.actions[:,self.active_joints] = actions[:,:self.cfg.DOF].clone()
         else:
             self.actions = actions.clone()
-        #post_throw_hat = (torch.sigmoid(actions[:,3]) > 0.5).clone().reshape(-1, 1).repeat(1, 6)
 
-        self.actions = self.last_action + self.cfg.AccRate*self.actions
-
-        self.actions = torch.clamp(self.actions, -1.0, 1.0)
         if self.cfg.planar:
-            self.actions_fifo = torch.cat([self.actions_fifo[:,1:,:], self.actions[:,1:4].clone().reshape(-1, 1, 3)], dim=1)
+            self.actions_fifo = torch.cat([self.actions_fifo[:,1:,:], self.actions[:,self.active_joints].clone().reshape(-1, 1, self.cfg.DOF)], dim=1)
         else:
             self.actions_fifo = torch.cat([self.actions_fifo[:,1:,:], self.actions.clone().reshape(-1, 1, 6)], dim=1)
-        #self.cmd_acc = self.actions* self.cfg.action_scale
 
-        steps_since_postThrow = self.steps_since_postThrow.reshape(-1, 1).repeat(1, 6)
-        post_throw = (steps_since_postThrow > 0)
-        #relStep = (self.episode_length_buf % self.cfg.maxEp_steps).float() / self.cfg.maxEp_steps
-        #post_throw = (relStep.reshape(-1, 1).repeat(1, 6)) > 
+        if self.cfg.actionMode == "jerk":
+            self.cmd_jerk = self.actions * self.cfg.jerkLimit 
 
-        #self.post_throw_error = torch.linalg.norm(post_throw_hat.float() - post_throw.float(), dim=-1)
+        if self.cfg.actionMode == "acc":
+            self.cmd_jerk = torch.zeros_like(self.cmd_jerk)
+            self.joint_qdd = self.last_actions + self.actions * self.cfg.max_acc/4 #200/20 = 10
+            self.joint_qdd = torch.clamp(self.joint_qdd, -self.cfg.max_acc, self.cfg.max_acc)
 
-        # stop the robot by aggressively decelerating with additional damping
-        damping_factor = 5.0  # Increase this for stronger damping
-        acc = -self.joint_qd * (1 / dt) * 0.5 # Add velocity-based damping (1/dt=20)
-        max_delta_acc = self.cfg.action_scale * self.cfg.AccRate  # Increased from 5 for faster deceleration
-        delta_acc = self.cmd_acc - acc
-        small_acc = (torch.abs(delta_acc) < max_delta_acc).float()
-        clipped_acc = self.cmd_acc - torch.clip(delta_acc, min=-max_delta_acc, max=max_delta_acc)
-        acc = acc * small_acc + (1-small_acc) * clipped_acc
-        self.cmd_acc = self.actions * self.cfg.action_scale #* (1-post_throw.float()) + acc * post_throw.float()
-
-
-        vel_est = self.joint_qd + self.cmd_acc * dt
-        max_vel = 3.0
-        vel_above = (vel_est > max_vel).float()
-        vel_below = (vel_est < -max_vel).float()
-        high_vel_est = vel_above + vel_below
-        acc_to_vel_limit = (max_vel - self.joint_qd) / dt
-        acc_to_neg_limit = (-max_vel - self.joint_qd) / dt
-        clipped_acc = vel_above * acc_to_vel_limit + vel_below * acc_to_neg_limit
-        self.cmd_acc = self.cmd_acc.clone()* (1-high_vel_est) + high_vel_est*clipped_acc
-
-        self.cmd_acc = torch.clamp(self.cmd_acc, -self.cfg.action_scale, self.cfg.action_scale)
-        
-        self.last_action = self.actions.clone()
-
+        elif self.cfg.actionMode == "vel":
+            self.cmd_jerk = torch.zeros_like(self.cmd_jerk)
+            self.joint_qdd = torch.zeros_like(self.joint_qdd)
+            self.joint_qd = self.last_actions + self.actions * self.cfg.max_vel/6 #10/20 = 0.5
+            self.joint_qd = torch.clamp(self.joint_qd, -self.cfg.max_vel, self.cfg.max_vel)
         
     def _apply_action(self):
         """Apply the joint position targets to the robot"""
         dt = self.cfg.sim.dt 
 
         
-        self.joint_q = self.joint_q + self.joint_qd * (dt) + 0.5 * self.cmd_acc * (dt) ** 2 #
-        self.joint_qd = self.joint_qd + self.cmd_acc*(dt)
+        self.joint_q = self.joint_q + self.joint_qd * (dt) + 0.5 * self.joint_qdd * (dt**2) + (1/6)*self.cmd_jerk*(dt**3)
+        self.joint_qd = self.joint_qd + self.joint_qdd * (dt) + 0.5 * self.cmd_jerk * (dt**2)
+        self.joint_qdd = self.joint_qdd + self.cmd_jerk * dt
+
+        self.joint_qd = torch.clamp(self.joint_qd, -self.cfg.max_vel, self.cfg.max_vel)
+        self.joint_qdd = torch.clamp(self.joint_qdd, -self.cfg.max_acc, self.cfg.max_acc)
 
         commanded_pos = self.joint_q
         self._robot.set_joint_position_target(commanded_pos) 
@@ -165,8 +147,8 @@ class ThrowEnv(DirectRLEnv):
         else:
             dropped = self.block_pos_w[:, 2] < 0.0
             eePos_x = self.eePos_w[:, 0] - self.robot_root_pos_w[:, 0]
-            far_ee_x = eePos_x < -0.5
-            terminated = dropped | far_ee_x
+            #far_ee_x = eePos_x < -0.5
+            terminated = dropped #| far_ee_x
 
         self.num_terminated = torch.sum(terminated).item()
         return terminated, truncated
@@ -177,26 +159,29 @@ class ThrowEnv(DirectRLEnv):
         
         self.sample_env_state(env_ids)  # Target Positions
 
-        self.last_action[env_ids] = torch.zeros_like(self.last_action[env_ids])
         self.actions_fifo[env_ids] = torch.zeros_like(self.actions_fifo[env_ids])
         self.steps_since_postThrow[env_ids] = 0
         
         self.joint_q[env_ids] = self._robot.data.joint_pos[env_ids].clone()
         self.joint_qd[env_ids] = self._robot.data.joint_vel[env_ids].clone()
+        self.joint_qdd[env_ids] = torch.zeros_like(self.joint_qd[env_ids])
+
+        self.last_actions[env_ids] = torch.zeros_like(self.last_actions[env_ids])
 
         if self.cfg.planar:
-            self.joint_pos_fifo[env_ids] = self.joint_q[env_ids,1:4].clone().reshape(-1, 1, 3).repeat(1, self.cfg.histLen, 1)
+            self.joint_pos_fifo[env_ids] = self.joint_q[env_ids][:,self.active_joints].clone().reshape(-1, 1, self.cfg.DOF).repeat(1, self.cfg.histLen, 1)
         else:
             self.joint_pos_fifo[env_ids] = self.joint_q[env_ids,:].clone().reshape(-1, 1, 6).repeat(1, self.cfg.histLen, 1)
         self.joint_vel_fifo[env_ids] = torch.zeros_like(self.joint_pos_fifo[env_ids])
+        self.joint_acc_fifo[env_ids] = torch.zeros_like(self.joint_pos_fifo[env_ids])
 
+        self.block_mass[env_ids] = self._block.root_physx_view.get_masses().clone().to(device=self.device)[env_ids]
 
-        self.block_mass = self._block.root_physx_view.get_masses().clone().to(device=self.device)
         block_props= self._block.root_physx_view.get_material_properties().clone().to(device=self.device)
-        self.block_staticFriction  = block_props[:, 0, 0].reshape(-1, 1)
-        self.block_dynamicFriction = block_props[:, 0, 1].reshape(-1, 1)
-        self.block_restitution = block_props[:, 0, 2].reshape(-1, 1)
-        self.block_com = self._block.root_physx_view.get_coms().clone()[:,:3].to(device=self.device)
+        self.block_staticFriction[env_ids]  = block_props[env_ids, 0, 0].reshape(-1, 1)
+        self.block_dynamicFriction[env_ids] = block_props[env_ids, 0, 1].reshape(-1, 1)
+        self.block_restitution[env_ids] = block_props[env_ids, 0, 2].reshape(-1, 1)
+        self.block_com[env_ids] = self._block.root_physx_view.get_coms().clone().to(device=self.device)[env_ids,:3]
 
 
         self.joint_pos = self.joint_q.clone()
@@ -212,15 +197,32 @@ class ThrowEnv(DirectRLEnv):
         self.eeQuat_w[env_ids] = ee_state[:, 3:7]
         self.eeVel[env_ids] = ee_state[:, 7:]
 
+        self.True_model = torch.cat((self.assets_sizes, self.block_mass, self.block_staticFriction, self.block_dynamicFriction, self.block_restitution), dim=-1)
         # Randomize object parameters for robustness analysis
-        #self.block_staticFriction[env_ids] = torch.ones_like(self.block_staticFriction[env_ids]) * 1.0 # base 0.5
-        #self.block_dynamicFriction[env_ids] = torch.ones_like(self.block_dynamicFriction[env_ids]) * 0.1 # base 0.
-        #self.block_restitution[env_ids] = torch.ones_like(self.block_restitution[env_ids]) * 0.2   # base 0.25
+        #self.block_staticFriction[env_ids] = 0.2 + 0.8 * torch.rand_like(self.block_mass[env_ids], device=self.device) #
+        #self.block_staticFriction[env_ids] = torch.clamp(self.block_staticFriction[env_ids], min=self.block_dynamicFriction[env_ids])
         
-        #self.block_mass[env_ids] = torch.ones_like(self.block_mass[env_ids]) * 0.1 # base 0..5
-        #self.assets_sizes[env_ids,0] = torch.ones_like(self.assets_sizes[env_ids,0])*0.05
+        #self.block_dynamicFriction[env_ids] = 0.2 + 0.8 * torch.rand_like(self.block_mass[env_ids], device=self.device) #
+        #self.block_dynamicFriction[env_ids] = torch.clamp(self.block_dynamicFriction[env_ids], max=self.block_staticFriction[env_ids])
+        #self.block_restitution[env_ids] = 0.0 + 0.5 * torch.rand_like(self.block_restitution[env_ids], device=self.device)   # base 0.25
+
+        #self.block_staticFriction[env_ids] = self.block_staticFriction[env_ids] + (torch.rand_like(self.block_mass[env_ids], device=self.device) - 0.5)*2*self.cfg.noiseLevel
+        #self.block_staticFriction[env_ids] = torch.clamp(self.block_staticFriction[env_ids], min=0.1, max=1.0)
+        #self.block_dynamicFriction[env_ids] = self.block_dynamicFriction[env_ids] + (torch.rand_like(self.block_mass[env_ids], device=self.device) - 0.5)*2*self.cfg.noiseLevel
+        #sself.block_dynamicFriction[env_ids] = torch.clamp(self.block_dynamicFriction[env_ids], min=torch.ones_like(self.block_dynamicFriction[env_ids], device=self.device)*0.1, max=self.block_staticFriction[env_ids])
+
+        
+        #self.block_mass[env_ids] = 0.1 + 0.9 * torch.rand_like(self.block_mass[env_ids], device=self.device) # base 0..5
+        #self.assets_sizes[env_ids,0] = 0.05 + (0.2-0.05) * torch.rand_like(self.assets_sizes[env_ids,0], device=self.device)
         #self.assets_sizes[env_ids,1] = torch.ones_like(self.assets_sizes[env_ids,1])*0.1
-        #self.assets_sizes[env_ids,2] = torch.ones_like(self.assets_sizes[env_ids,2])*0.1      # base 0.1
+        #self.assets_sizes[env_ids,2] = 0.05 + (0.25-0.05) * torch.rand_like(self.assets_sizes[env_ids,2], device=self.device)
+
+        #self.assets_sizes[env_ids,0] = 0.05
+        #self.assets_sizes[env_ids,1] = 0.05
+        #self.assets_sizes[env_ids,2] = 0.25
+
+        #self.block_staticFriction[env_ids] = 0.2
+        #self.block_dynamicFriction[env_ids] = 0.2
 
         self.update_curriculum()
 
@@ -255,31 +257,42 @@ class ThrowEnv(DirectRLEnv):
 
         block_state = torch.cat([block_pos, block_ori], dim=-1) # type: ignore
         if self.cfg.planar:
-            actions_fifo = self.actions_fifo.reshape(-1, 3*self.cfg.histLen) if self.cfg.histLen > 1 else self.actions[:,1:4].clone()
-            joint_pos_fifo = self.joint_pos_fifo.reshape(-1, 3*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_q[:,1:4].clone()
-            joint_vel_fifo = self.joint_vel_fifo.reshape(-1, 3*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_qd[:,1:4].clone()
+            actions_fifo = self.actions_fifo.reshape(-1, self.cfg.DOF*self.cfg.histLen) if self.cfg.histLen > 1 else self.actions[:,self.active_joints].clone()
+            joint_pos_fifo = self.joint_pos_fifo.reshape(-1, self.cfg.DOF*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_q[:,self.active_joints].clone()
+            joint_vel_fifo = self.joint_vel_fifo.reshape(-1, self.cfg.DOF*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_qd[:,self.active_joints].clone()
+            joint_acc_fifo = self.joint_acc_fifo.reshape(-1, self.cfg.DOF*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_qdd[:,self.active_joints].clone()
         else:
             actions_fifo = self.actions_fifo.reshape(-1, 6*self.cfg.histLen) if self.cfg.histLen > 1 else self.actions.clone()
             joint_pos_fifo = self.joint_pos_fifo.reshape(-1, 6*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_q.clone()
             joint_vel_fifo = self.joint_vel_fifo.reshape(-1, 6*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_qd.clone()
-
+            joint_acc_fifo = self.joint_acc_fifo.reshape(-1, 6*self.cfg.histLen) if self.cfg.histLen > 1 else self.joint_qdd.clone()
         steps_since_postThrow = self.steps_since_postThrow.reshape(-1, 1)
         post_throw = (steps_since_postThrow > 2).float()
 
         object_model = torch.cat((self.assets_sizes, self.block_mass, self.block_staticFriction, self.block_dynamicFriction, self.block_restitution), dim=-1)
         #object_model = torch.cat((self.assets_sizes, self.block_mass, self.block_staticFriction, self.block_dynamicFriction), dim=-1)
+        
 
         if target == "policy":
             obs = torch.cat(
                 (
                     joint_pos_fifo,          # 6 +
                     joint_vel_fifo,          # 6 + --> 12
+                    joint_acc_fifo,          # 6 + --> 18
                     actions_fifo,
                     self.target_pos, # 2D or 3D (currently a redundant y axis)
                     object_model,    # 5 + --> 25
                 ),
                 dim=-1,
             )
+
+            if self.cfg.muRobust:
+                uncertain_object_model = torch.cat((self.assets_sizes, self.block_mass,
+                                            self.block_staticFriction + (2*torch.rand_like(self.block_staticFriction)-1.0)*0.15,
+                                            self.block_dynamicFriction + (2*torch.rand_like(self.block_dynamicFriction)-1.0)*0.15,
+                                            self.block_restitution), dim=-1)
+                n_object_model = object_model.shape[1]
+                obs[:,-n_object_model:] = uncertain_object_model
 
             
         if target == "critic":
@@ -289,6 +302,7 @@ class ThrowEnv(DirectRLEnv):
                 (
                     joint_pos_fifo,      # 6 +
                     joint_vel_fifo,      # 6 + --> 12
+                    joint_acc_fifo,      # 6 + --> 18
                     ee_pos,        # 3 + --> 15
                     ee_ori,         # 6 + --> 21
                     ee_Vel,         # 6 + --> 27
@@ -341,19 +355,21 @@ class ThrowEnv(DirectRLEnv):
         self.contactForce[env_ids] = self._contactSensor.data.force_matrix_w[env_ids].squeeze()
 
         if self.cfg.planar:
-            self.joint_pos_fifo = torch.cat([self.joint_pos_fifo[:,1:,:], self.joint_q[:,1:4].reshape(-1, 1, 3)], dim=1)
-            self.joint_vel_fifo = torch.cat([self.joint_vel_fifo[:,1:,:], self.joint_qd[:,1:4].reshape(-1, 1, 3)], dim=1)
+            self.joint_pos_fifo = torch.cat([self.joint_pos_fifo[:,1:,:], self.joint_q[:,self.active_joints].reshape(-1, 1, self.cfg.DOF)], dim=1)
+            self.joint_vel_fifo = torch.cat([self.joint_vel_fifo[:,1:,:], self.joint_qd[:,self.active_joints].reshape(-1, 1, self.cfg.DOF)], dim=1)
+            self.joint_acc_fifo = torch.cat([self.joint_acc_fifo[:,1:,:], self.joint_qdd[:,self.active_joints].reshape(-1, 1, self.cfg.DOF)], dim=1)
         else:
-            self.joint_pos_fifo = torch.cat([self.joint_pos_fifo[:,1:,:], self.joint_q.reshape(-1, 1, 6)], dim=1)
-            self.joint_vel_fifo = torch.cat([self.joint_vel_fifo[:,1:,:], self.joint_qd.reshape(-1, 1, 6)], dim=1)
+            self.joint_pos_fifo = torch.cat([self.joint_pos_fifo[:,1:,:], self.joint_q.reshape(-1, 1, self.cfg.DOF)], dim=1)
+            self.joint_vel_fifo = torch.cat([self.joint_vel_fifo[:,1:,:], self.joint_qd.reshape(-1, 1, self.cfg.DOF)], dim=1)
+            self.joint_acc_fifo = torch.cat([self.joint_acc_fifo[:,1:,:], self.joint_qdd.reshape(-1, 1, self.cfg.DOF)], dim=1)
 
     def _get_rewards(self) -> torch.Tensor:
         # Refresh the intermediate values after the physics steps
         """Object Position"""
-        jointAcc_norm = torch.linalg.vector_norm(self.cmd_acc, dim=1, ord=1)
-        jointAcc_rate_penalty = torch.linalg.vector_norm((self.cmd_acc - self.last_cmd_acc), dim=1, ord=1)
-        self.last_cmd_acc = self.cmd_acc.clone()
         jointVel_norm = torch.linalg.vector_norm(self.joint_qd, dim=1, ord=2)
+        jointAcc_norm = torch.linalg.vector_norm(self.joint_qdd, dim=1, ord=2)
+        jointJerk_norm = torch.linalg.vector_norm(self.cmd_jerk, dim=1, ord=2)
+
 
 
         target_pos =  self.target_pos + self._robot.data.root_link_state_w[:, :3]
@@ -402,8 +418,8 @@ class ThrowEnv(DirectRLEnv):
             + self.cfg.sparse_rewScale * success_rew
 
             - self.cfg.reg_rewScale * jointAcc_norm* reg_scale
-            - self.cfg.reg_rewScale * jointAcc_rate_penalty*reg_scale
-            + (3 -jointVel_norm)* reg_scale*post_throw.float()*100
+            - self.cfg.reg_rewScale * jointJerk_norm* reg_scale*1e-1
+            + self.cfg.reg_rewScale * (3 -jointVel_norm)* reg_scale*post_throw.float()*1000
 
 
         )
@@ -414,6 +430,7 @@ class ThrowEnv(DirectRLEnv):
         #block_pos_rel[:, 2] -= self.assets_sizes[:, 2] / 2  # account for block radius
 
 
+
         self.extras["log"] = {
             "scale": self.scale,
             "post_throw": post_throw,
@@ -421,18 +438,20 @@ class ThrowEnv(DirectRLEnv):
             "BlockError": block_pos_error,
             "velocity_towards_target": velocity_towards_target,
             
-            "is_success": is_success & not_far_ee_x,
+            "is_success": is_success,# & not_far_ee_x,
             "success_rew": success_rew,
 
-            "JointAcc": self.cmd_acc,
             "jointAcc_norm": jointAcc_norm,
             "jointVel_norm": jointVel_norm,
+            "jointJerk_norm": jointJerk_norm,
+
+            "cmdJerk": self.cmd_jerk,
 
             "block_state": torch.cat((block_pos_rel, self.block_quat_w, self.block_vel, post_throw.reshape(-1,1)), dim=-1),
             "ee_state": torch.cat((ee_pos, self.eeQuat_w, self.eeVel), dim=-1),
             "joint_state": torch.cat((self.joint_pos, self.joint_vel), dim=-1),
             "target_pos": self.target_pos,
-            "ObjectModel": torch.cat((self.block_mass, self.block_staticFriction, self.block_dynamicFriction, self.block_restitution, self.real_assets_sizes, self.block_com, self.x_shift.reshape(-1,1)), dim=-1),
+            "ObjectModel": torch.cat((self.block_mass, self.block_staticFriction, self.block_dynamicFriction, self.block_restitution, self.assets_sizes, self.block_com, self.x_shift.reshape(-1,1), self.True_model), dim=-1),
         }
 
         return rewards
@@ -456,22 +475,23 @@ class ThrowEnv(DirectRLEnv):
         self.joint_vel = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
 
         if self.cfg.planar:
-            self.actions_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 3), device=self.device)
-            self.joint_pos_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 3), device=self.device)
-            self.joint_vel_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 3), device=self.device)
+            self.actions_fifo = torch.zeros((self.num_envs, self.cfg.histLen, self.cfg.DOF), device=self.device)
+            self.joint_pos_fifo = torch.zeros((self.num_envs, self.cfg.histLen, self.cfg.DOF), device=self.device)
+            self.joint_vel_fifo = torch.zeros((self.num_envs, self.cfg.histLen, self.cfg.DOF), device=self.device)
+            self.joint_acc_fifo = torch.zeros((self.num_envs, self.cfg.histLen, self.cfg.DOF), device=self.device)
         else:
             self.actions_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 6), device=self.device)
             self.joint_pos_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 6), device=self.device)
             self.joint_vel_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 6), device=self.device)
+            self.joint_acc_fifo = torch.zeros((self.num_envs, self.cfg.histLen, 6), device=self.device)
 
-        self.last_action = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
         self.actions = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
-
+        self.last_actions = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
         self.joint_q = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
         self.joint_qd = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
+        self.joint_qdd = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
 
-        self.cmd_acc = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
-        self.last_cmd_acc = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
+        self.cmd_jerk = torch.zeros((self.num_envs, self._robot.num_joints), device=self.device)
 
         self.contactForce = torch.zeros((self.num_envs, 3), device=self.device)
         self.steps_since_postThrow = torch.zeros((self.num_envs,), device=self.device)
@@ -479,6 +499,12 @@ class ThrowEnv(DirectRLEnv):
         self.x_shift = torch.zeros((self.num_envs,), device=self.device)
 
         self.target_pos = torch.tensor([2.0,0.0,0]).repeat(self.num_envs, 1).to(self.device)
+
+        self.block_mass = torch.zeros((self.num_envs, 1), device=self.device)
+        self.block_staticFriction = torch.zeros((self.num_envs, 1), device=self.device)
+        self.block_dynamicFriction = torch.zeros((self.num_envs, 1), device=self.device)
+        self.block_restitution = torch.zeros((self.num_envs, 1), device=self.device)
+        self.block_com = torch.zeros((self.num_envs, 3), device=self.device)
 
 
     def update_curriculum(self):
@@ -492,8 +518,6 @@ class ThrowEnv(DirectRLEnv):
         self.cfg.reg_rewScale = 1e-1* self.scale
 
         
-        #if self.cfg.training:
-        #    self.cfg.action_scale = 40.0*self.scale
     def sample_env_state(self, env_ids):
         self.init_joint_pos[env_ids] = self._sample_init_joint(self._robot.data.default_joint_pos[env_ids])
 
@@ -506,7 +530,7 @@ class ThrowEnv(DirectRLEnv):
 
         
         #radius = 0.9*torch.rand(len(env_ids), device=self.device)*0.1
-        #self.x_shift[env_ids] = 0.1*(torch.rand(len(env_ids), device=self.device)-0.5)*2
+        #self.x_shift[env_ids] = 0.05*(torch.rand(len(env_ids), device=self.device)-0.5)*2
         #theta = 2*math.pi*torch.rand(len(env_ids), device=self.device)
         #theta = torch.zeros_like(theta)
         block_pose[:, 0] += self.x_shift[env_ids]#radius * torch.cos(theta)
@@ -520,19 +544,22 @@ class ThrowEnv(DirectRLEnv):
         #target_angle = (torch.rand_like(self.init_joint_pos[env_ids, 0])-0.5) * math.pi/2
 
         target_radius = 2.5 + (torch.rand_like(self.target_pos[env_ids, 0])-0.5) * 2 * 1.0
-        #target_radius = 4 + torch.rand_like(self.target_pos[env_ids, 0])*0.5
+        #target_radius_neg = -2.5 + (torch.rand_like(self.target_pos[env_ids, 0])-0.5) * 2 * 1.0
+        #target_radius_neg_idx = torch.rand(len(env_ids), device=self.device) > 0.5
+        #target_radius[target_radius_neg_idx] = target_radius_neg[target_radius_neg_idx]
+        #target_radius = 4.0 + (torch.rand_like(self.target_pos[env_ids, 0]))*0.5 
 
-        #target_radius = torch.ones_like(target_radius)*3.5
+        #target_radius = torch.ones_like(target_radius)*2.5
 
         target_x = target_radius * torch.cos(target_angle) + 0.133 * torch.sin(target_angle)
         target_y = target_radius * torch.sin(target_angle) + 0.133 * torch.cos(target_angle)
 
-        target_z = (0.1 + (torch.rand_like(self.target_pos[env_ids, 2])-0.5) * 2 * 1.0)  # 0.8 is robot stand height
-        #target_z = 1.6 + torch.rand_like(self.target_pos[env_ids, 2]) * 0.5  # 0.8 is robot stand height
+        target_z = (0.1 + (torch.rand_like(self.target_pos[env_ids, 2])-0.5) * 2 * 1.0)  # 0.88 is robot stand height
+        #target_z = (1.6 + (torch.rand_like(self.target_pos[env_ids, 2])*0.5)) #2:2.5  # 0.88 is robot stand height
 
         #target_z = torch.ones_like(target_y)*(-0.88+0.15)
-        #target_z = torch.ones_like(target_y)*(-0.88+0.8)
-        #target_z = torch.ones_like(target_y)*(-0.88+1.8)
+        #target_z = torch.ones_like(target_y)*(-0.88+1.05)
+        #target_z = torch.ones_like(target_y)*(-0.88+1.85)
 
 
         self.target_pos[env_ids, 0] = target_x
@@ -553,6 +580,8 @@ class ThrowEnv(DirectRLEnv):
         
         # Sample random angle between -45 and 45 degrees
         angle = math.pi / 2 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
+        #angle = math.pi / 4 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
+
         coeff1 = 2 * torch.rand_like(init_joint_pos[:, 0]) - 1 # why not  torch.rand_like(init_joint_pos[:, 0])
         coeff2 = 2 * torch.rand_like(init_joint_pos[:, 0]) - 1
         coeff3 = coeff1 + coeff2

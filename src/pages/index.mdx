@@ -23,15 +23,15 @@ import outside from "../assets/supp.mp4";
 
 import sysID from "../assets/sysID.webm";
 import bleachCleanser from "../assets/bleachCleanser_throw.webm";
-import chips from "../assets/chips_throw.webm";
-import crackerBox from "../assets/crackerBox_throw.webm";
-import largeBox from "../assets/largeBox_throw.webm";
-import mug from "../assets/mug_throw.webm";
-import mustardBottle from "../assets/mustardBottle_throw.webm";
-import pitcher from "../assets/pitcher_throw.webm";
-import powerDrill from "../assets/powerDrill_throw.webm";
-import rubiks from "../assets/rubiks_throw.webm";
-import woodBlock from "../assets/woodBlock_throw.webm";
+import chips from "../assets/throwChipsSim.webm";
+import crackerBox from "../assets/throwCrackerBoxSim.webm";
+import largeBox from "../assets/throwLargeBoxSim.webm";
+import mug from "../assets/throwMugSim.webm";
+import mustardBottle from "../assets/throwMustardBottleSim.webm";
+import pitcher from "../assets/throwPitcherSim.webm";
+import powerDrill from "../assets/throwPowerDrillSim.webm";
+import cuboid from "../assets/throwParallelSim.webm";
+import woodBlock from "../assets/throwWoodBlockSim.webm";
 
 
 import Splat from "../components/Splat.tsx"
@@ -48,9 +48,8 @@ import ranges from "../assets/ranges.png";
 import reward from "../assets/reward.png";
 import observation from "../assets/observation.png";
 
-import real1 from "../assets/Real1.png";
-import real2 from "../assets/Real2.png";
-
+import real1 from "../assets/real1.png";
+import real2 from "../assets/real2.png";
 
 
 
@@ -70,7 +69,7 @@ export const components = {pre: CodeBlock, table: Table}
       notes: ["*"],
     },
   ]}
-  conference="IEEE International Conference on Robotics and Automation (ICRA 2026)"
+  conference="IEEE International Conference on Robotics and Automation (IROS 2026)"
   notes={[
     {
       symbol: "*",
@@ -80,7 +79,7 @@ export const components = {pre: CodeBlock, table: Table}
   links={[
     {
       name: "Paper",
-      url: "https://github.com/Abdullah-AIST/NP-Throw/blob/main/npthrow_icra2026.pdf",
+      url: "https://github.com/Abdullah-AIST/NP-Throw/blob/main/npthrow_iros2026.pdf",
       icon: "ri:file-pdf-2-line",
     },
     {
@@ -106,351 +105,151 @@ export const components = {pre: CodeBlock, table: Table}
   </div>
 </section>
 <h2 style="text-align: left"> Abstract </h2>
+<h1 style="text-align: justify"> 
+Robotic throwing enables fast object transport
+and extends a robot’s reachable workspace beyond traditional
+pick-and-place. While prehensile (grasp-based) throwing works
+well for graspable items, non-prehensile (grasp-free) throwing is
+better suited for large, heavy, and/or deformable objects. Existing
+approaches rely on model-based optimization with simplified
+contact models (e.g., dynamic grasping) and low-dimensional
+trajectory parameterizations, which limit solution quality and
+reachable workspace. We propose a reinforcement learning
+approach that additionally leverages sliding and rolling contact
+modes and directly optimizes joint-space trajectories without ana-
+lytical contact models or custom parameterizations. The Markov
+Decision Process (MDP) is formulated as a dynamical system that
+evolves the robot’s joint state conditioned on the throwing target,
+object model, and initial configuration. Joint-jerk trajectories are
+planned offline at a low control rate and upsampled into smooth,
+high-rate velocity commands for deployment. For sim-to-real
+transfer, we minimize the robot-dynamics gap through minimum-
+jerk system identification and train uncertainty-aware policies
+to mitigate object-modeling errors, particularly sensitivity to
+dynamic friction. In simulation, the policy achieves 99% success
+across thousands of configurations and generalizes to unseen
+objects. Sensitivity analysis shows robustness to mass uncertainty
+but high sensitivity to dynamic friction, consistent with the
+sliding-based release mechanism. Deployed zero-shot on a UR5e
+operating near its physical limits (5 m/s end-effector velocity),
+our method throws diverse objects—including heavy (790 g) and
+large (20 × 20 × 28 cm) items—to targets up to 350 cm distance
+or 180 cm elevation, achieving a 97% real-world success rate.
+</h1>
 
-Robotic systems have adopted throwing skills to enable fast and far-reaching object transportation beyond traditional pick-and-place operations. However, prehensile (grasp-based) throwing limits the range of manipulable objects to those that are feasible to grasp. In contrast, achieving non-prehensile (grasp-free) throwing requires precise control of inertial and frictional forces. In this work, we propose learning a non-prehensile throwing policy via reinforcement learning. Our Markov Decision Process (MDP) formulation enables offline planning of throwing trajectories for random objects—including heavy (790 g) and large (20x20x28 cm) ones—to random target positions as far as 3.5 m and as high as 1.8 m, while operating at the robot’s physical limits (5 m/s). Our simulation-trained policy is transferred to the real world in a zero-shot manner, achieving an average success rate of 85% across different objects and targets. Furthermore, our results demonstrate the policy’s robustness to modeling uncertainties and its generalization to unseen objects, including cylindrical cans and partially-filled bottles.
 </HighlightedSection>
 
 <HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
 <h2 style="text-align: left"> Demo: ThrowAnyThing </h2>
-
-We test NP-Throw’s robustness by applying trajectories optimized for the "Wood Block" to other objects. The policy maintains high success rates, showing robustness to mass and size variations.
-
+<h1 style="text-align: justify"> 
+We test NP-Throw’s robustness by applying trajectories optimized for the "Wood Block" to other objects. The policy maintains high success rates, showing robustness to mass and size variations. **It can also be used for multi-object throwing.**
+</h1>
 <Figure>
-  <span slot="title"> Distance: 250 cm & Elevation: 80 cm </span>
-  <YouTubeVideo slot="figure" videoId="JWAr3b1pHvg" />
-  <span slot="caption">Success Rate [9/10]</span>
+  <YouTubeVideo slot="figure" videoId="cCaNVLNmmoA" />
 </Figure>
 
 
-<TwoColumns>
-  <Figure slot="left">
-    <span slot="title"> Distance: 350 cm & Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="3cm91NqeYGs" />
-    <span slot="caption">Success Rate [7/10]</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Distance: 200 cm & Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="qZSsmia3iIc" />
-    <span slot="caption">Success Rate [8/10]</span>
-  </Figure>
-</TwoColumns>
 </HighlightedSection>
 
 <HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
 
 <h2 style="text-align: left">   Real-World Evaluation   </h2>
-Across five objects and nine target positions, our policy achieved an average of 85% success rate. Most failures were for high targets (180 cm) where friction modeling uncertainties significantly affected the release time.
+<h4 style="text-align: left"> Across five objects and nine target positions, our policy achieved an average of 97% success rate. </h4>
 <Figure >
-  <Image slot="figure" source={real1} altText="Diagram of the transformer deep learning architecture."/>
+    <Image slot="figure" source={real2} altText="Diagram of the transformer deep learning architecture." width="600"/>
+</Figure>
+<Figure >
+  <Image slot="figure" source={real1} altText="Diagram of the transformer deep learning architecture." width="600"/>
 </Figure>
 
-<h2 style="text-align: center">┌──────────────┐</h2>
-<h2 style="text-align: center">   Rubik's Cube   </h2>
-<h2 style="text-align: center">└──────────────┘</h2>
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   200 cm Distance -- 15 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="x6jqhhjJH4g" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="GIFib2o-EPY" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="Hkng3o-BCxk" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-</ThreeColumns>
+<Figure>
+  <YouTubeVideo slot="figure" videoId="rOx5r6R4INI" />
+</Figure>
 
-<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="l4JG_B67stY" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="CWOV4Fy8nJ4" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="NfWMCc8er2E" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="8QVi7EydKUI" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="oSSirqTd2PE" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="vf6R-BODCt0" />
-    <span slot="caption">**Success Rate: [5/10]**</span>
-  </Figure>
-</ThreeColumns>
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   200 cm Distance -- 105 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-</HighlightedSection>
-<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
+<Figure>
+  <YouTubeVideo slot="figure" videoId="cC5eadY9UvU" />
+</Figure>
 
-<h2 style="text-align: center">┌──────────────┐</h2>
-<h2 style="text-align: center">   Wood Block   </h2>
-<h2 style="text-align: center">└──────────────┘</h2>
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   200 cm Distance -- 185 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="F4qBYxIV1P8" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="BMeLkNe8H7s" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="uKfexIF0KTQ" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="eEMig6cb27A" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="4fua2ubgxvw" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="Hf9fg2WgXDA" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-</ThreeColumns>
+<Figure>
+  <YouTubeVideo slot="figure" videoId="phFxVQ-Ivn0" />
+</Figure>
 
-<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="Hf9fg2WgXDA" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="HoIbJ15hOSo" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="ihsyZtRRmkQ" />
-    <span slot="caption">**Success Rate: [7/10]**</span>
-  </Figure>
-</ThreeColumns>
-</HighlightedSection>
-<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   250 cm Distance -- 15 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-<h2 style="text-align: center">┌──────────────┐</h2>
-<h2 style="text-align: center">   Chips Can   </h2>
-<h2 style="text-align: center">└──────────────┘</h2>
+<Figure>
+  <YouTubeVideo slot="figure" videoId="GsnE-hyoeLg" />
+</Figure>
 
-<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="EI15I6mwNuI" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="Bzit6SSL84c" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="R-jq3gr3Tpo" />
-    <span slot="caption">**Success Rate: [6/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="yM_K2lNbX6k" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="3Ng_icy-lDY" />
-    <span slot="caption">**Success Rate: [8/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="6XGxqWj_754" />
-    <span slot="caption">**Success Rate: [7/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="gMSBYdjpW14" />
-    <span slot="caption">**Success Rate: [7/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="g0Ayius-BW8" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="eebjk28t7yc" />
-    <span slot="caption">**Success Rate: [7/10]**</span>
-  </Figure>
-</ThreeColumns>
-</HighlightedSection>
-<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   250 cm Distance -- 105 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-<h2 style="text-align: center">┌──────────────┐</h2>
-<h2 style="text-align: center">   Partially-Filled Bottle   </h2>
-<h2 style="text-align: center">└──────────────┘</h2>
+<Figure>
+  <YouTubeVideo slot="figure" videoId="u0AxM9PuSY8" />
+</Figure>
 
-<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="VePm_CXGW9E" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="wBcARuXO3MU" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="CQnAgxSKWe8" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="8w3QSQXf6Js" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="cT5eIqpLXpg" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="mzJxBD7z6Z4" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="XIJNHRe5i9M" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="s9XSBTtdYas" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="MTytJ9FuMfk" />
-    <span slot="caption">**Success Rate: [6/10]**</span>
-  </Figure>
-</ThreeColumns>
-</HighlightedSection>
-<HighlightedSection bgColor="bg-gray-200 dark:bg-zinc-200">
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   250 cm Distance -- 185 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-<h2 style="text-align: center">┌──────────────┐</h2>
-<h2 style="text-align: center">   Large Box   </h2>
-<h2 style="text-align: center">└──────────────┘</h2>
+<Figure>
+  <YouTubeVideo slot="figure" videoId="mxHXAvSckJc" />
+</Figure>
 
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   300 cm Distance -- 15 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
 
-<h3 style="text-align: center"> ───────────────(Distance: 150 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="rX0KroIzqb4" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="vx07RX6SGFc" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="WO-j12L2XxY" />
-    <span slot="caption">**Success Rate: [4/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 250 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="tOW0Qqh1BhE" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="8Vad3GNWmUo" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="LKesU0XCFrE" />
-    <span slot="caption">**Success Rate: [7/10]**</span>
-  </Figure>
-</ThreeColumns>
-<h3 style="text-align: center"> ───────────────(Distance: 350 cm )───────────────</h3>
-<ThreeColumns>
-  <Figure slot="left">
-    <span slot="title"> Elevation: 15 cm </span>
-    <YouTubeVideo slot="figure" videoId="t286Xwyulpk" />
-    <span slot="caption">**Success Rate: [10/10]**</span>
-  </Figure>
-  <Figure slot="center">
-    <span slot="title"> Elevation: 80 cm </span>
-    <YouTubeVideo slot="figure" videoId="ULxhk8BQmHY" />
-    <span slot="caption">**Success Rate: [9/10]**</span>
-  </Figure>
-  <Figure slot="right">
-    <span slot="title"> Elevation: 180 cm </span>
-    <YouTubeVideo slot="figure" videoId="JZJoTx6CE5E" />
-    <span slot="caption">**Success Rate: [4/10]**</span>
-  </Figure>
-</ThreeColumns>
+<Figure>
+  <YouTubeVideo slot="figure" videoId="NWb-fPKSEYo" />
+</Figure>
+
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   300 cm Distance -- 105 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
+
+<Figure>
+  <YouTubeVideo slot="figure" videoId="9OiC0sTiUIA" />
+</Figure>
+
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   300 cm Distance -- 185 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
+
+<Figure>
+  <YouTubeVideo slot="figure" videoId="NS6UbZ-tQac" />
+</Figure>
+
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   350 cm Distance -- 15 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
+
+<Figure>
+  <YouTubeVideo slot="figure" videoId="QcSMC3HUqu0" />
+</Figure>
+
+<h2 style="text-align: center">┌────────────────────────────────┐</h2>
+<h2 style="text-align: center">   350 cm Distance -- 105 cm Elevation   </h2>
+<h2 style="text-align: center">└────────────────────────────────┘</h2>
+
+<Figure>
+  <YouTubeVideo slot="figure" videoId="cCaNVLNmmoA" />
+</Figure>
 
 </HighlightedSection>
 
@@ -458,12 +257,12 @@ Across five objects and nine target positions, our policy achieved an average of
 
 <h2 style="text-align: left">  Simulation Trajectories   </h2>
     <div style="display: flex; gap: 20px;">
-      <Video source={rubiks} caption="Rubik's Cube"/>
+      <Video source={cuboid} caption="In-Distribution Cuboid"/>
       <Video source={chips} caption="Chips Can"/>
       <Video source={largeBox} caption="Large Box"/>
     </div>
     <div style="display: flex; gap: 20px;">
-      <Video source={bleachCleanser} caption="Bleach Cleanser"/>
+      <Video source={woodBlock} caption="Wood Block"/>
       <Video source={mustardBottle} caption="Mustard Bottle"/>
       <Video source={crackerBox} caption="Cracker Box"/>
     </div>
@@ -475,133 +274,6 @@ Across five objects and nine target positions, our policy achieved an average of
 
 </HighlightedSection>
 
-
-<HighlightedSection bgColor="bg-red-50 dark:bg-zinc-200">
-
-<h2 style="text-align: left">   Method   </h2>
-
-We formulate the problem as a Markov Decision Process (MDP) and deploy the policy as an offline planner ensuring sim-to-real transferability.
-
-**(1) Markov Decision Process:**
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Observation Space:** For offline planning, we do not use explicit object state. Instead, we assume that the robot state (joint positions and velocities) and object model are sufficient for planning open-loop throwing trajectories. An asymmetric actor-critic architecture is employed, where the critic receives privileged information during training.</p>
-  </div>
-</section>
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Action Space:** An acceleration-based action is well-suited for smooth position/velocity trajectories and control frequency upsampling. The 20 Hz acceleration trajectory is upsampled to 120/480 simulated/real velocity commanded trajectories.</p>
-  </div>
-</section>
-      <LaTeX formula="q_t = q_{t-1} + \dot{q}_{t-1}dt + \frac{1}{2} \ddot{q}_t dt^2 \;\; , \;\; \dot{q}_t = \dot{q}_{t-1} + \ddot{q}_{t}dt" />
-
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Reward Formulation:** We design a weighted reward function combining live, dense, sparse, and regularization terms to promote accurate throws while discouraging undesired behaviors such as double throws, excessive projectile height, and high joint jerk.</p>
-  </div>
-</section>
-
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Initial State Distribution:** We randomize the object model (cuboids) to cover a wide range of sizes, masses, and friction coefficients, including both small/large and light/heavy objects. Target positions are sampled to span long distances (up to 350 cm) and high elevations (up to 180 cm).</p>
-  </div>
-</section>
-
-<div style="display: flex; align-items: flex-start; gap: 20px;">
-  <Figure style="flex: 1;">
-    <Image slot="figure" source={ranges} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-  <Figure style="flex: 1;">
-    <Image slot="figure" source={observation} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-  <Figure style="flex: 1;">
-    <Image slot="figure" source={reward} altText="Diagram of the transformer deep learning architecture." width="500"/>
-  </Figure>
-</div>
-
-**(2) Deployment & Planning:**
-
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Offline Trajectoroy Genenration:** Given object model, target position, and initial joint state, the acceleration trajectory is generated recursively by updating the joint acceleration, velocity, and position. Such workflow does not have access to groundtruth simuated/real states mitigating sensory noise and control latenncies.</p>
-  </div>
-</section>
-
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Post-Throw Velocity Damping:** After the throw is detected or predicted—using a regressor trained on object model, target position, and initial joint state—a PD controller is applied to smoothly dampen joint velocities, ensuring stable robot behavior post-release.</p>
-  </div>
-</section>
-
-<section class>
-  <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-      <p>**Sim-to-Real Transfer:** We employ population-based system identification to tune simulated actuator gains, ensuring that the position and velocity profiles of predefined trajectories closely match those observed on the real robot.</p>
-  </div>
-</section>
-
-  <div style="display: flex; gap: 20px;">
-    <Figure style="flex: 1;">
-      <Image slot="figure" source={arch} altText="Diagram of the transformer deep learning architecture." width="500"/>
-      <span slot="caption">Recursive planning of throwing trajectories using object model, target location, and initial robot state.</span>
-    </Figure>
-    <Figure style="flex: 1;">
-      <Image slot="figure" source={regress} altText="Diagram of the transformer deep learning architecture." width="500"/>
-      <span slot="caption">Throw timing is predicted using object model, target location, and initial robot state. After release, a PD controller smoothly damps joint velocities for stable post-throw behavior.</span>
-    </Figure>
-  </div>
-
-  <Video source={sysID} width="50%" caption="Population-based system identification of robot dynamics."/>
-
-
-
-</HighlightedSection>
-
-<HighlightedSection bgColor="bg-green-50 dark:bg-zinc-200">
-
-<h2 style="text-align: left"> Simulation Results </h2>
-
-  <section class>
-    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-        <p>**Policy Performance:** The policy achieves high success rates across most configurations, with reduced performance observed for extreme target distances or elevations, large height-to-length ratios, and objects with high static friction. Tall objects and those with high friction are more prone to sticking or rolling, which can affect throw accuracy.</p>
-    </div>
-  </section>
-
-  <Figure>
-    <Image slot="figure" source={perform} altText="Diagram of the transformer deep learning architecture." width="1000%"/>
-  </Figure>
-
-  <section class>
-    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-        <p>**Design Ablations:** Our reward formulation and action space outperform alternative designs, resulting in higher success rates. The selected configuration for control frequency, maximum acceleration, and observation history further maximizes performance.</p>
-    </div>
-  </section>
-  
-  <Figure>
-    <Image slot="figure" source={ablation} altText="Diagram of the transformer deep learning architecture." width="500%" />
-  </Figure>
-
-  <section class>
-    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-        <p>**Generalization to Unseen Objects:** The policy generalizes to a variety of YCB objects, including those with shifted centers of mass. Performance decreases for objects with high mass or friction, primarily due to increased sticking and rolling effects.</p>
-    </div>
-  </section>
-
-  <Figure >
-    <Image slot="figure" source={general} altText="Diagram of the transformer deep learning architecture." width="500%"/>
-  </Figure>
-
-  <section class>
-    <div class="box" style="background-color: #f5f5f5; border-left: 4px solid #df3f3cff; padding: 10px; font-size: 0.5rem; margin-left: 0;">
-        <p>**Robustness to Modeling Uncertainty:** The policy demonstrates robustness to inaccuracies in mass, size, and moderate placement offsets or center of mass shifts. However, significant errors in friction modeling can noticeably reduce policy performance.</p>
-    </div>
-  </section>  
-
-  <Figure >
-    <Image slot="figure" source={robust} altText="Diagram of the transformer deep learning architecture." width="500%"/>
-  </Figure>
-
-
-</HighlightedSection>
 
 
 ## BibTeX citation

@@ -6,9 +6,9 @@
 <sup>1</sup> xx, <sup>2</sup> xxx -->
 
 
-Submitted to IEEE International Conference of Robotics and Automation (ICRA 2026).
+Submitted to IEEE International Conference on Intelligent Robots and Systems (IROS 2026).
 
-[Paper](npthrow_icra2026.pdf) | [Arxiv](https://abdullah-aist.github.io/NP-Throw/) | [Video](https://www.youtube.com/watch?v=JWAr3b1pHvgv) | [Website](https://abdullah-aist.github.io/NP-Throw/)
+[Paper](npthrow_iros2026.pdf) | [Arxiv](https://abdullah-aist.github.io/NP-Throw/) | [Video](https://www.youtube.com/watch?v=cCaNVLNmmoA&list=PL-XZP4GY6WiBOCX9hSkCK-KPi4r0uBiZf) | [Website](https://abdullah-aist.github.io/NP-Throw/)
 
 [![IsaacSim](https://img.shields.io/badge/IsaacSim-4.5.0-silver.svg)](https://docs.isaacsim.omniverse.nvidia.com/latest/index.html)
 [![Python](https://img.shields.io/badge/python-3.10-blue.svg)](https://docs.python.org/3/whatsnew/3.10.html)
@@ -59,7 +59,7 @@ python scripts/Eval.py --task=NPThrow --num_envs 32 --headless --experiment_name
 
 ```
 ### Deploy
-1. Process the trajectories using the "processTrajs_real.ipynb" notebook to analyze and generate neccessary trajectories.
+1. Process the trajectories using the "processTrajs.ipynb" notebook to analyze and generate neccessary trajectories.
 2. Deploy based of UR-RTDE package 
 
 ```bash
@@ -73,7 +73,7 @@ If you use this code in your research, please cite our paper:
 @inproceedings{NP_Throw_ICRA2026,
   title = "Non-Prehensile Throwing: A Reinforcement Learning Perspective",
   author = "{Author One, Author Two}",
-  booktitle={ICRA 2026},
+  booktitle={IROS 2026},
   year={2026},
   organization={IEEE}
 }
