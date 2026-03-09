@@ -107,13 +107,13 @@ class EventCfg:
 
 @configclass
 class ThrowEnvCfg(DirectRLEnvCfg):
-    jerkLimit = 150.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
+    jerkLimit = 100.0#*2/3 # 200/20 = 10 m/s^2 max change in acc per step -- 100/20 = 5
     ctrl_Freq = 20 #20*1.5
 
     max_vel = 3.0
     max_acc = 40.0
 
-    training = True
+    training = False
     evaluating = (not training) 
 
     RandCOM = False
@@ -161,7 +161,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     )
 
     # scene
-    spacing = 6
+    spacing = 4
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=spacing, replicate_physics=False)
 
 

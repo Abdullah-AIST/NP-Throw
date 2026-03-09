@@ -55,32 +55,32 @@ class EventCfg:
 
     # -- object
     # uncomment to enable randomization
-    object_physics_material = EventTerm(
-        func=mdp.randomize_rigid_body_material,
-        min_step_count_between_reset=0, # reset every episode
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("block"),
-            "static_friction_range": (0.5, 0.5),      # 0.4
-            "dynamic_friction_range": (0.2, 0.2),      # 0.2 # rubiks 0.35 other 0.25
-            "restitution_range": (0.0, 0.0),           # (0.0, 0.5),
-            "num_buckets": 5000,
-            "make_consistent": True,
-        },
-    )
-
-    object_abs_mass = EventTerm(
-        func=mdp.randomize_rigid_body_mass,
-        min_step_count_between_reset=0,
-        mode="reset",
-        params={
-            "asset_cfg": SceneEntityCfg("block"),
-            "mass_distribution_params": (0.1, 0.1), # (0.05, 0.5), #rubic,chips: 0.1, liquid:0.2, # 0.1
-            "operation": "abs",
-            "distribution": "uniform",
-            "recompute_inertia": True, 
-        },
-    )
+    #object_physics_material = EventTerm(
+    #    func=mdp.randomize_rigid_body_material,
+    #    min_step_count_between_reset=0, # reset every episode
+    #    mode="reset",
+    #    params={
+    #        "asset_cfg": SceneEntityCfg("block"),
+    #        "static_friction_range": (0.5, 0.5),      # 0.4
+    #        "dynamic_friction_range": (0.2, 0.2),      # 0.2 # rubiks 0.35 other 0.25
+    #        "restitution_range": (0.0, 0.0),           # (0.0, 0.5),
+    #        "num_buckets": 5000,
+    #        "make_consistent": True,
+    #    },
+    #)
+#
+    #object_abs_mass = EventTerm(
+    #    func=mdp.randomize_rigid_body_mass,
+    #    min_step_count_between_reset=0,
+    #    mode="reset",
+    #    params={
+    #        "asset_cfg": SceneEntityCfg("block"),
+    #        "mass_distribution_params": (1.0, 1.0), # (0.05, 0.5), #rubic,chips: 0.1, liquid:0.2, # 0.1
+    #        "operation": "abs",
+    #        "distribution": "uniform",
+    #        "recompute_inertia": True, 
+    #    },
+    #)
 
     randomize_scale: EventTerm = EventTerm(
         func=mdp.randomize_rigid_body_scale,
@@ -237,7 +237,7 @@ class ThrowEnvCfg(DirectRLEnvCfg):
 
 
     # use target="cuboid" for random sized blocks
-    target = "real_woodBlock"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
+    target = "real_largeBox"  #"cylinder", "block", "customBlock", "woodBlock", "chips", "crackerBox", "mustardBottle", "powerDrill", "bleachCleanser"
     real_targets = {
                     "real_chips": [0.075, 0.075, 0.250],
                     "real_woodBlock": [0.2, 0.085, 0.085],
@@ -255,15 +255,15 @@ class ThrowEnvCfg(DirectRLEnvCfg):
     YCB_tragets = {
 
                     "dexCube": [0.1, 0.1, 0.1],
+
+                    "crackerBox": [0.158, 0.06, 0.21], 
                     #"crackerBox": [0.06, 0.158, 0.21], 
-                    #"crackerBox": [0.158, 0.06, 0.21], 
-                    "crackerBox": [0.06, 0.158, 0.21], 
 
-                    #"mustardBottle": [0.095, 0.058, 0.190],  # rotated
-                    "mustardBottle": [0.058, 0.095, 0.190], 
+                    "mustardBottle": [0.095, 0.058, 0.190],  # rotated
+                    #"mustardBottle": [0.058, 0.095, 0.190], 
 
-                    #"bleachCleanser": [0.098, 0.065, 0.250], # rotated
-                    "bleachCleanser": [0.065, 0.098, 0.250],
+                    "bleachCleanser": [0.098, 0.065, 0.250], # rotated
+                    #"bleachCleanser": [0.065, 0.098, 0.250],
 
 
                     #"powerDrill": [0.15, 0.05, 0.184], # rotated

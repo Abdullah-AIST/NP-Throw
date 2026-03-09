@@ -549,7 +549,7 @@ class ThrowEnv(DirectRLEnv):
         #target_radius[target_radius_neg_idx] = target_radius_neg[target_radius_neg_idx]
         #target_radius = 4.0 + (torch.rand_like(self.target_pos[env_ids, 0]))*0.5 
 
-        target_radius = torch.ones_like(target_radius)*3.0
+        #target_radius = torch.ones_like(target_radius)*2.5
 
         target_x = target_radius * torch.cos(target_angle) + 0.133 * torch.sin(target_angle)
         target_y = target_radius * torch.sin(target_angle) + 0.133 * torch.cos(target_angle)
@@ -559,7 +559,7 @@ class ThrowEnv(DirectRLEnv):
 
         #target_z = torch.ones_like(target_y)*(-0.88+0.15)
         #target_z = torch.ones_like(target_y)*(-0.88+1.05)
-        target_z = torch.ones_like(target_y)*(-0.88+1.85)
+        #target_z = torch.ones_like(target_y)*(-0.88+1.85)
 
 
         self.target_pos[env_ids, 0] = target_x
@@ -579,8 +579,8 @@ class ThrowEnv(DirectRLEnv):
         #init_joint_pos[:, 0] = math.pi/2 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
         
         # Sample random angle between -45 and 45 degrees
-        #angle = math.pi / 2 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
-        angle = math.pi / 4 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
+        angle = math.pi / 2 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
+        #angle = math.pi / 4 * (torch.rand_like(init_joint_pos[:, 0]) - 0.5)
 
         coeff1 = 2 * torch.rand_like(init_joint_pos[:, 0]) - 1 # why not  torch.rand_like(init_joint_pos[:, 0])
         coeff2 = 2 * torch.rand_like(init_joint_pos[:, 0]) - 1
