@@ -70,7 +70,7 @@ python scripts/deploy.py
 ## Citation
 If you use this code in your research, please cite our paper:
 ```bibtex
-@inproceedings{NP_Throw_ICRA2026,
+@inproceedings{NP_Throw_IROS2026,
   title = "Non-Prehensile Throwing: A Reinforcement Learning Perspective",
   author = "{Author One, Author Two}",
   booktitle={IROS 2026},
