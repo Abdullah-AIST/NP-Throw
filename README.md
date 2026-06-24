@@ -6,7 +6,7 @@
 <sup>1</sup> xx, <sup>2</sup> xxx -->
 
 
-Submitted to IEEE International Conference on Intelligent Robots and Systems (IROS 2026).
+Accepted to IEEE International Conference on Intelligent Robots and Systems (IROS 2026).
 
 [Paper](npthrow_iros2026.pdf) | [Arxiv](https://abdullah-aist.github.io/NP-Throw/) | [Video](https://www.youtube.com/watch?v=cCaNVLNmmoA&list=PL-XZP4GY6WiBOCX9hSkCK-KPi4r0uBiZf) | [Website](https://abdullah-aist.github.io/NP-Throw/)
 
@@ -72,7 +72,7 @@ If you use this code in your research, please cite our paper:
 ```bibtex
 @inproceedings{NP_Throw_IROS2026,
   title = "Non-Prehensile Throwing: A Reinforcement Learning Perspective",
-  author = "{Author One, Author Two}",
+  author = "{Abdullah Mustafa, Ryo Hanai, Ixchel Ramirez, Floris Erich, Ryoichi Nakajo, Yukiyasu Domae, Tetsuya Ogata}",
   booktitle={IROS 2026},
   year={2026},
   organization={IEEE}
